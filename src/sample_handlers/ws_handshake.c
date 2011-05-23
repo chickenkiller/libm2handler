@@ -9,8 +9,8 @@
 #include <stdio.h>
 #include <signal.h>
 
-#include "../m2handler.h"
-#include "../m2websocket.h"
+#include <m2handler.h>
+#include <m2websocket.h>
 
 // Static function definitions
 static const struct tagbstring SENDER = bsStatic("82209006-86FF-4982-B5EA-D1E29E55D483");
