@@ -1,5 +1,11 @@
 *.o
 libm2handler*
 lib/nbproject/
-Makefile-handler.mk
+src/Makefile-handler.mk
 config.sqlite
+src/Makefile-src.mk
+src/.dep.inc
+nbproject/
+reports/
+deployment/logs/
+deployment/run/
