@@ -2,7 +2,7 @@ OPTCFLAGS=-I/opt/local/include
 OPTLFLAGS=-L/opt/local/lib
 LOCAL_MONGREL2_LIB=-L. -lm2handler
 
-CFLAGS=-g -std=c99 -Wall -Werror -I. -Imd5/ -Ibstr/ -I/opt/local/include
+CFLAGS=-g -std=gnu99 -Wall -Werror -I. -Imd5/ -Ibstr/ -I/opt/local/include
 LFLAGS=-L/opt/local/lib $(OPTLFLAGS)
 LIBS=-lzmq -ljansson
 SRCS=$(wildcard *.c bstr/*.c md5/*.c)
