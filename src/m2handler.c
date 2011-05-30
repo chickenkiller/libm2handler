@@ -364,19 +364,15 @@ int mongrel2_request_for_disconnect(mongrel2_request *req){
 
     method_str = json_string_value(method_obj);
     bstring method_bstr = bfromcstr(method_str);
-    json_decref(method_obj);
-    json_decref(json_body);
     
     if(method_obj == NULL || bstrcmp(method_bstr,&DISCONNECT) != 0){
         bdestroy(method_bstr);
-        json_decref(method_obj);
         json_decref(json_body);
         bdestroy(header);
         return 0;
     }
     bdestroy(method_bstr);
 
-    json_decref(method_obj);
     json_decref(json_body);
     bdestroy(header);
     return 1;
@@ -410,8 +406,6 @@ bstring mongrel2_request_get_header(mongrel2_request *req, char* key){
     json_t *header_val_obj = json_object_get(req->headers,key);
     const char* val_str = json_string_value(header_val_obj);
     bstring retval = bfromcstr((char*)val_str);
-    json_decref(header_val_obj);
-
     return retval;
 }
 
