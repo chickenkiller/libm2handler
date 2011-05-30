@@ -43,6 +43,8 @@ install: all
 	install -d -o root $(PREFIX)/include/bstr/
 	install -o root bstr/bstrlib.h $(PREFIX)/include/bstr/
 	install -o root bstr/bstraux.h $(PREFIX)/include/bstr/
+	install -d -o root $(PREFIX)/lib/pkgconfig
+	install -o root m2handler.pc $(PREFIX)/lib/pkgconfig
 
 clean : 
 	rm -f $(OBJS) $(SAMPLE_APPS) libm2handler.a handler_pipe

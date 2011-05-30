@@ -24,6 +24,19 @@ AND I QUOTE (http://markmail.org/message/oqebrtdanawsiz62)
 This (common) problem is caused by writing to a socket (or a file) bytes derived from a structure which has alignment padding, which is uninitialised. That is harmless, but the problem is I don't know of a general way to suppress these errors which doesn't also potentially hide real bugs when you mistakenly write uninitialised data to a file/ socket. The best I can suggest is to do a case-by-case suppression yourself (--gen-suppressions=yes is your friend).
 END QUOTE
 
+### Installation ###
+
+Run the following commands:
+
+    cd libm2handler/src
+    make
+    make test
+    sudo make install
+
+You can compile your own handlers like this:
+
+    gcc myhandler.c -o myhandler $(pkg-config --cflags --libs m2handler)
+
 ### Sample Handlers ###
 
 From inside of lib run 'make test' to build all the handlers.
