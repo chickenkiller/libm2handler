@@ -9,3 +9,8 @@ nbproject/
 reports/
 deployment/logs/
 deployment/run/
+
+/src/sample_handlers/body_toupper
+/src/sample_handlers/daemon_to_upper
+/src/sample_handlers/fifo_reader
+/src/sample_handlers/ws_handshake
