@@ -290,6 +290,12 @@ mongrel2_request *mongrel2_recv(mongrel2_socket *pull_socket){
 int mongrel2_send(mongrel2_socket *pub_socket, bstring response){
     zmq_msg_t *msg = calloc(1,sizeof(zmq_msg_t));
 
+    #ifdef DEBUG
+    fprintf(stdout,"=======MONGREL2_SEND==========\n");
+    fprintf(stdout,"''%.*s''\n",blength(response),bdata(response));
+    fprintf(stdout,"==============================\n");
+    #endif
+
     /**
      * zmq_bstr_free was calling free on bdata(response) which was wrong!
      * It needs to be called on the bstring itself. So that gets passed
@@ -301,11 +307,6 @@ int mongrel2_send(mongrel2_socket *pub_socket, bstring response){
     zmq_msg_close(msg);
     free(msg);
 
-    #ifdef DEBUG
-    fprintf(stdout,"=======MONGREL2_SEND==========\n");
-    fprintf(stdout,"''%.*s''\n",blength(response),bdata(response));
-    fprintf(stdout,"==============================\n");
-    #endif
     return 0;
 }
 /**
