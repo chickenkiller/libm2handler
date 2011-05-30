@@ -93,7 +93,7 @@ static void mongrel2_set_identity(mongrel2_ctx *ctx, mongrel2_socket *socket, co
       exit(EXIT_FAILURE);
     }
 }
-mongrel2_socket* mongrel2_pull_socket(mongrel2_ctx *ctx, char* identity){
+mongrel2_socket* mongrel2_pull_socket(mongrel2_ctx *ctx, const char* identity){
     mongrel2_socket *socket;
     socket = mongrel2_alloc_socket(ctx,ZMQ_PULL);
 
@@ -402,10 +402,10 @@ int mongrel2_disconnect(mongrel2_socket *pub_socket, mongrel2_request *req){
  * @param key
  * @return
  */
-bstring mongrel2_request_get_header(mongrel2_request *req, char* key){
+bstring mongrel2_request_get_header(mongrel2_request *req, const char* key){
     json_t *header_val_obj = json_object_get(req->headers,key);
     const char* val_str = json_string_value(header_val_obj);
-    bstring retval = bfromcstr((char*)val_str);
+    bstring retval = bfromcstr(val_str);
     return retval;
 }
 
