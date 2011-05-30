@@ -8,6 +8,9 @@ LIBS=-lzmq -ljansson
 SRCS=$(wildcard *.c bstr/*.c md5/*.c)
 OBJS=$(patsubst %.c,%.o,${SRCS})
 
+# # uncomment me to print raw debug information
+# CFLAGS+=-DDEBUG
+
 SAMPLE_SRCS=$(wildcard sample_handlers/*.c)
 SAMPLE_OBJS=$(patsubst %.c,%.o,${SAMPLE_SRCS})
 SAMPLE_APPS=$(patsubst %.c,%,${SAMPLE_SRCS})

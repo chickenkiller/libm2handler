@@ -18,8 +18,6 @@
 #include "bstr/bstraux.h"
 #include <strings.h>
 
-#define DEBUG
-
 static const struct tagbstring SPACE = bsStatic(" ");
 static const struct tagbstring COLON = bsStatic(":");
 static const struct tagbstring COMMA = bsStatic(",");
