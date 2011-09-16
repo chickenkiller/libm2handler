@@ -31,7 +31,7 @@ test: libm2handler.a $(SAMPLE_APPS)
 scan-build:
 	scan-build make test
 
-install: lib
+install: libm2handler.a
 	install -d -o root $(PREFIX)/lib/
 	install -o root libm2handler.a $(PREFIX)/lib/
 	install -d -o root $(PREFIX)/include/
