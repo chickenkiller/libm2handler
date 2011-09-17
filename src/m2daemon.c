@@ -12,7 +12,16 @@
  */
 
 #include <m2handler.h>
+#include <config.h>
+  #if defined __APPLE__ && defined __MACH__
+  #define daemon deprecated
+  #endif
 #include <unistd.h>
+  #if defined __APPLE__ && defined __MACH__
+  #undef daemon
+  extern int daemon(int, int);
+  #endif
+
 
 int mongrel2_pid_file(bstring path){
     return 0;
