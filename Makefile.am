@@ -4,11 +4,11 @@ noinst_LTLIBRARIES = libbstr.la
 libm2handler_la_LDFLAGS         = -lzmq -ljansson
 libm2handler_la_LIBADD          = libbstr.la
 libm2handler_la_includedir      = $(includedir)/m2handler
-libm2handler_la_include_HEADERS = src/m2handler.h \
-                                  src/m2websocket.h
+libm2handler_la_include_HEADERS = src/handler.h \
+                                  src/websocket.h
 
-libm2handler_la_SOURCES = src/m2handler.c \
-                          src/m2websocket.c \
+libm2handler_la_SOURCES = src/handler.c \
+                          src/websocket.c \
                           src/md5/md5.c
 
 libbstr_la_includedir      = $(includedir)/m2handler/bstr

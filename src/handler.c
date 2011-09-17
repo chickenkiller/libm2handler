@@ -8,12 +8,12 @@
  * Mongrel2 documentation: http://mongrel2.org/doc/tip/docs/manual/book.wiki
  *
  */
-#include<stdio.h>
-#include<stdlib.h>
-#include<string.h>
-#include<zmq.h>
-#include<jansson.h>
-#include "m2handler.h"
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <zmq.h>
+#include <jansson.h>
+#include "handler.h"
 #include "bstr/bstrlib.h"
 #include "bstr/bstraux.h"
 #include <strings.h>

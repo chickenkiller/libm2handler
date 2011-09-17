@@ -11,7 +11,7 @@
  *
  */
 
-#include <m2handler.h>
+#include "handler.h"
 #include <config.h>
   #if defined __APPLE__ && defined __MACH__
   #define daemon deprecated

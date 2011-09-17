@@ -7,8 +7,8 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include "m2handler.h"
-#include "m2websocket.h"
+#include "handler.h"
+#include "websocket.h"
 #include "md5/md5.h"
 
 #define START_CHAR (unsigned char)0x00
