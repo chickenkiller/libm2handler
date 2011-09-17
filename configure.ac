@@ -7,6 +7,7 @@ AM_PROG_LIBTOOL
 AC_CONFIG_MACRO_DIR(m4)
 
 AC_PROG_CC_C99
+AM_PROG_CC_C_O
 
 # TODO, check for zmq
 # TODO, check for jansson

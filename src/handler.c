@@ -405,8 +405,16 @@ int mongrel2_disconnect(mongrel2_socket *pub_socket, mongrel2_request *req){
  * @param key
  * @return
  */
-bstring mongrel2_request_get_header(mongrel2_request *req, char* key){
+bstring mongrel2_request_get_header(const mongrel2_request *req, const char* key){
+    if(req->headers == NULL){
+      fprintf(stderr,"mongrel2_request_get_header called against empty headers\n");
+      return NULL;
+    }
+
     json_t *header_val_obj = json_object_get(req->headers,key);
+    if(header_val_obj == NULL){
+      fprintf(stderr,"Ruh roh, could not get key\n");
+    }
     const char* val_str = json_string_value(header_val_obj);
     bstring retval = bfromcstr((char*)val_str);
     json_decref(header_val_obj);

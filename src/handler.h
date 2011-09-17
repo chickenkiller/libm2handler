@@ -57,6 +57,6 @@ int mongrel2_reply_http(mongrel2_socket *pub_socket, mongrel2_request *req, cons
 int mongrel2_request_for_disconnect(mongrel2_request *req);
 int mongrel2_disconnect(mongrel2_socket *pub_socket, mongrel2_request *req);
 
-bstring mongrel2_request_get_header(mongrel2_request *req, char* key);
+bstring mongrel2_request_get_header(const mongrel2_request *req, const char* key);
 int mongrel2_request_finalize(mongrel2_request *req);
 #endif

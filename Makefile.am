@@ -1,7 +1,13 @@
 lib_LTLIBRARIES = libm2handler.la
 noinst_LTLIBRARIES = libbstr.la
 noinst_bindir = `pwd`/example/bin
-noinst_bin_PROGRAMS = body_toupper daemon_to_upper fifo_reader ws_handshake
+noinst_bin_PROGRAMS = $(sample_handlers) \
+					  $(test_programs)
+
+AM_CFLAGS=-g -std=gnu99 -Wall -Werror -I. -Imd5/ -Ibstr/ -I/opt/local/include
+
+sample_handlers=body_toupper daemon_to_upper fifo_reader ws_handshake
+test_programs=ws_accept
 
 libm2handler_la_LDFLAGS         = -lzmq -ljansson
 libm2handler_la_LIBADD          = libbstr.la
@@ -11,7 +17,7 @@ libm2handler_la_include_HEADERS = src/handler.h \
 
 libm2handler_la_SOURCES = src/handler.c \
                           src/websocket.c \
-                          src/md5/md5.c
+                          src/sha1/sha1.c
 
 libbstr_la_includedir      = $(includedir)/m2handler/bstr
 libbstr_la_include_HEADERS = src/bstr/bstrlib.h \
@@ -39,3 +45,9 @@ ws_handshake_CPPFLAGS     = -Isrc/
 ws_handshake_DEPENDENCIES = libm2handler.la
 ws_handshake_LDADD        = -lm2handler
 ws_handshake_SOURCES      = $(handlerdir)/ws_handshake.c
+
+testdir = test
+ws_accept_CPPFLAGS        = -Isrc/
+ws_accept_DEPENDENCIES    = libm2handler.la
+ws_accept_LDADD           = -lm2handler
+ws_accept_SOURCES         = $(testdir)/ws_accept.c

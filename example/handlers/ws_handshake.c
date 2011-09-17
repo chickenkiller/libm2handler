@@ -30,10 +30,14 @@ static void call_for_stop(int sig_id){
 }
 
 int main(int argc, char **args){
+    if(argc != 3){
+        fprintf(stderr,"%s RECV SEND\n",args[0]);
+        exit(1);
+    }
     signal(SIGINT,&call_for_stop);
     
-    bstring pull_addr = bfromcstr("tcp://127.0.0.1:7999");
-    bstring pub_addr  = bfromcstr("tcp://127.0.0.1:7998");
+    bstring pull_addr = bfromcstr(args[1]);
+    bstring pub_addr  = bfromcstr(args[2]);
 
     mongrel2_ctx *ctx = mongrel2_init(1); // Yes for threads?
 
@@ -55,7 +59,7 @@ int main(int argc, char **args){
         poll_response = zmq_poll(&socket_tracker,1,500*1000);
         if(poll_response > 0){
             request = mongrel2_recv(pull_socket);
-            fprintf(stdout,"got something...");
+            fprintf(stdout,"got something...\n");
             if(request != NULL && mongrel2_request_for_disconnect(request) != 1){
                 mongrel2_ws_reply_upgrade(request,pub_socket);
                 bstring msg = bformat("{\"msg\" : \"hi there %d\"}", request->conn_id);
