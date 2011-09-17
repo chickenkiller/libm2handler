@@ -6,7 +6,7 @@
  * Created on May 23, 2011, 4:59 PM
  * 
  **/
-#include <m2handler.h>
+#include "handler.h"
 static const struct tagbstring SENDER = bsStatic("82209006-86FF-4982-B5EA-D1E29E55D481");
 
 int main(int argc, char **args){
