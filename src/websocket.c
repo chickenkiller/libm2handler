@@ -25,7 +25,7 @@ static const char* WEBSOCKET_08_UPGRADE =
     "HTTP/1.1 101 Switching Protocols\r\n"
     "Upgrade: websocket\r\n"
     "Connection: Upgrade\r\n"
-    "Sec-WebSocket-Accept: %s\r\n";
+    "Sec-WebSocket-Accept: %*s\r\n";
 static const char* WEBSOCKET_08_KEY      = "sec-websocket-key";
 // static const char* WEBSOCKET_08_ORIGIN   = "sec-websocket-origin";
 // static const char* WEBSOCKET_08_PROTOCOL = "sec-websocket-protocol";
@@ -33,7 +33,7 @@ static const char* WEBSOCKET_08_KEY      = "sec-websocket-key";
 
 int mongrel2_ws_reply_upgrade(mongrel2_request *req, mongrel2_socket *socket){
     bstring headers = mongrel2_ws_upgrade_headers(req);
-    mongrel2_reply_http(socket,req,headers,NULL);
+    mongrel2_reply(socket,req,headers);
     bdestroy(headers);
     return 0;
 }
@@ -48,14 +48,16 @@ int mongrel2_ws_calculate_accept(mongrel2_request *req, bstring *accept){
 }
 
 bstring mongrel2_ws_08_upgrade_headers(mongrel2_request *req){
-    bstring accept = NULL;
+    bstring accept = bfromcstr("");
     int retval;
 
     retval = mongrel2_ws_08_calculate_accept(req,&accept);
     if(retval != 0){
         return NULL;
     }
-    bstring headers = bformat(WEBSOCKET_08_UPGRADE,accept);
+    bstring headers = bformat(WEBSOCKET_08_UPGRADE,blength(accept),bdata(accept));
+    fprintf(stdout,"upgrade headers\n=====\n%*s\n====\n",blength(headers),bdata(headers));
+    fprintf(stdout,"accept\n=====\n%*s\n====\n",blength(accept),bdata(accept));
 
     bdestroy(accept);
 
