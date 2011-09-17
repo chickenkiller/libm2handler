@@ -12,6 +12,25 @@ Installed and configured to your liking. If you are trying out the sample handle
 http://www.digip.org/jansson/
 https://github.com/akheron/jansson
 
+#### automake ####
+The gnu automake build system.
+
+### Building from Scratch ###
+
+You will need to translate the configure.ac to configure.
+
+  libtoolize -c || glibtoolize -c
+  autoreconf -fv --install
+
+### Building ###
+
+Great, now you have your build system. Now to build the Makefile.
+
+  ./configure
+  make
+  sudo make install
+
+
 ### Valgrind ###
 
 This software was developed with valgrind in hand.
