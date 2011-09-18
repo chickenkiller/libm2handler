@@ -63,6 +63,7 @@ int main(int argc, char **args){
             if(request != NULL && mongrel2_request_for_disconnect(request) != 1){
                 mongrel2_ws_reply_upgrade(request,pub_socket);
                 bstring msg = bformat("{\"msg\" : \"hi there %d\"}", request->conn_id);
+                fprintf(stdout,"Sending new msg: '%*s'",blength(msg),bdata(msg));
                 mongrel2_ws_reply(pub_socket,request,msg);
                 bdestroy(msg);
                 mongrel2_request_finalize(request);

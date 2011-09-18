@@ -1,5 +1,10 @@
+#include <assert.h>
+
 #include "handler.h"
 #include "debug.h"
+
+#define START_CHAR (unsigned char)0x00
+#define TERM_CHAR (unsigned char)0xFF
 
 void mongrel2_debug_bstring(bstring data){
     if(data == NULL){

@@ -7,17 +7,19 @@ noinst_bin_PROGRAMS = $(sample_handlers) \
 AM_CFLAGS=-g -std=gnu99 -Wall -Werror -I. -Imd5/ -Ibstr/ -I/opt/local/include
 
 sample_handlers=body_toupper daemon_to_upper fifo_reader ws_handshake
-test_programs=ws_accept
+test_programs=ws_accept framing
 
 libm2handler_la_LDFLAGS         = -lzmq -ljansson
 libm2handler_la_LIBADD          = libbstr.la
 libm2handler_la_includedir      = $(includedir)/m2handler
 libm2handler_la_include_HEADERS = src/handler.h \
-                                  src/websocket.h
+                                  src/websocket.h \
+                                  src/debug.h
 
 libm2handler_la_SOURCES = src/handler.c \
                           src/websocket.c \
-                          src/sha1/sha1.c
+                          src/sha1/sha1.c \
+                          src/debug.c
 
 libbstr_la_includedir      = $(includedir)/m2handler/bstr
 libbstr_la_include_HEADERS = src/bstr/bstrlib.h \
@@ -51,3 +53,8 @@ ws_accept_CPPFLAGS        = -Isrc/
 ws_accept_DEPENDENCIES    = libm2handler.la
 ws_accept_LDADD           = -lm2handler
 ws_accept_SOURCES         = $(testdir)/ws_accept.c
+
+framing_CPPFLAGS          = -Isrc/
+framing_DEPENDENCIES      = libm2handler.la
+framing_LDADD			  = -lm2handler
+framing_SOURCES           = $(testdir)/framing.c
