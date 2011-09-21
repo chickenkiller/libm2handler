@@ -26,7 +26,8 @@ static const struct tagbstring COMMA = bsStatic(",");
 static const struct tagbstring SEPERATOR = bsStatic("\r\n\r\n");
 static const struct tagbstring JSON = bsStatic("JSON");
 static const struct tagbstring DISCONNECT = bsStatic("disconnect");
-static const char *RESPONSE_HEADER = "%s %d:%d, ";
+static const char *RESPONSE_HEADER = "%*s %d:%d, ";
+// bstring response = bformat(RESPONSE_HEADER,blength(req->uuid),bdata(req->uuid),blength(req->conn_id_bstr),req->conn_id);÷
 
 static void zmq_bstr_free(void *data, void *bstr){
     bdestroy(bstr);
@@ -320,7 +321,6 @@ int mongrel2_reply_http(mongrel2_socket *pub_socket, mongrel2_request *req, cons
     bstring payload = bstrcpy(headers);
     bconcat(payload, &SEPERATOR);
     bconcat(payload,body);
-    // mongrel2_send(pub_socket,response);
     int retval = mongrel2_reply(pub_socket, req, payload);
     bdestroy(payload);
     return retval;
@@ -334,8 +334,13 @@ int mongrel2_reply_http(mongrel2_socket *pub_socket, mongrel2_request *req, cons
  * @return
  */
 int mongrel2_reply(mongrel2_socket *pub_socket, mongrel2_request *req, const_bstring payload){
-    bstring response = bformat(RESPONSE_HEADER,bdata(req->uuid),blength(req->conn_id_bstr),req->conn_id);
-    bconcat(response,payload);
+    bstring response = bformat(RESPONSE_HEADER,blength(req->uuid),bdata(req->uuid),blength(req->conn_id_bstr),req->conn_id);
+    int retval = bconcat(response,payload);
+    if(retval != 0){
+      fprintf(stderr,"Could not concat response and payload\n");
+      bdestroy(response);
+      return -1;
+    }
     return mongrel2_send(pub_socket,response);
 }
 
