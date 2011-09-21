@@ -21,6 +21,7 @@ int main(int argc, char **args){
 
     mongrel2_request_finalize(req);
     if(biseqcstr(accept,"s3pPLMBiTxaQ9kYGzzhZRbK+xOo=") == 1){
+        fprintf(stdout,"ws accept succeeded\n");
         return 0;
     } else {
         fprintf(stderr,"ws_accept failed, was %s\n",bdata(accept));

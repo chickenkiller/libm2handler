@@ -74,12 +74,10 @@ uint8_t mongrel2_ws_frame_get_mask_present(size_t len, uint8_t* frame){
 
 ftype mongrel2_ws_frame_get_payload_type(size_t len, uint8_t* frame){
 	assert(len > 1);
-	uint8_t type = ((frame[1] & 0x7F));
-
+	uint8_t type = (frame[1] & 0x7F);
 	if(type <= 125){
 		return SMALL;
 	} else if(type == 126){
-		printf("It's medium!\n");
 		return MEDIUM;
 	} else if(type == 127){
 		return LARGE;
@@ -91,23 +89,18 @@ ftype mongrel2_ws_frame_get_payload_type(size_t len, uint8_t* frame){
 
 int mongrel2_ws_frame_set_payload_size(size_t len, uint8_t *frame, uint64_t size){
 	assert(len > 2);
-
-	uint16_t *medium_fptr = NULL;
-	uint64_t *large_fptr  = NULL;
+	uint8_t *sizeptr = (uint8_t*) (&size);
 
 	if(size <= 125){
-		printf("Setting a small (%lld) size!\n",size);
 		frame[1] |= (size & 0x7F);
 	} else if (size >= 126 && size <= 65536) {
-		printf("Setting a medium (%lld) size!\n",size);
 		frame[1] |= (126 & 0x7F);
-		medium_fptr = (uint16_t*) &(frame[2]);
-		*medium_fptr = (uint16_t) size;
+		memcpy(&(frame[2]),sizeptr,2);
 	// TODO: Upper bounds check. && size <= 18446744073709551616LL doesn't work!
+	// TODO: Add msg size assertions
 	} else if (size >= 65537){
 		frame[1] |= (127 & 0x7F);
-		large_fptr = (uint64_t*) &(frame[2]);
-		*large_fptr = size;
+		memcpy(&(frame[2]),sizeptr,8);
 	} else {
 		return -1;
 	}
@@ -116,50 +109,134 @@ int mongrel2_ws_frame_set_payload_size(size_t len, uint8_t *frame, uint64_t size
 
 uint64_t mongrel2_ws_frame_get_payload_size(size_t len, uint8_t *frame){
 	ftype type = mongrel2_ws_frame_get_payload_type(len,frame);
-	size_t retval = 0;
+
+	uint64_t retval = 0x0000000000000000;
 	switch(type){
 		case SMALL:
 			retval |= (frame[1] & 0x7F);
 			break;
 		case MEDIUM:
-			retval |= (0x00000000000000FF & (frame[2]));
-			retval |= (0x000000000000FF00 & (frame[3] << 8));
+			memcpy(&retval,&(frame[2]),2);
 			break;
 		case LARGE:
-			return -1;
+			memcpy(&retval,&(frame[2]),8);
+			break;
 	}
 	return retval;
 }
 
-void test_frame_small_no_mask(size_t *size_i, uint8_t **frame_i){
-	*frame_i= calloc(sizeof(uint8_t),3);
-	*size_i = 3;
-	size_t size = *size_i;
-	uint8_t *frame = *frame_i;
+int mongrel2_ws_frame_get_mask_start(size_t size, uint8_t *frame){
+	if (size < 5 || mongrel2_ws_frame_get_mask_present(size,frame) != 1){
+		return -1;
+	}
 
-	mongrel2_ws_frame_set_fin(size,frame);
-	mongrel2_ws_frame_set_opcode(size,frame,OP_TEXT);
-	mongrel2_ws_frame_set_payload_size(size,frame,125);
-	frame[1] |= 0x01;
-	frame[2]  = 'h';
+	int mask_start = 2;
+	fflag size_class = mongrel2_ws_frame_get_payload_size(size,frame);
+	if(size_class == SMALL){
+		// nothing
+	} else if (size_class == MEDIUM){
+		mask_start = mask_start + 2;
+	} else if (size_class == LARGE){
+		mask_start = mask_start + 8;
+	} else {
+		return -1;
+	}
+	// Reallign to make array lookup easy
+	return mask_start-1;
 }
 
-void test_frame_medium_no_mask(size_t *size_i, uint8_t **frame_i){
-	*frame_i= calloc(sizeof(uint8_t),3);
-	*size_i = 5;
-	size_t size = *size_i;
-	uint8_t *frame = *frame_i;
+int mongrel2_ws_frame_set_mask(size_t size, uint8_t *frame,uint32_t mask){
+	assert(size > 5);
+	// Set the high presence bit
+	frame[1] |= (0x80);
 
-	mongrel2_ws_frame_set_fin(size,frame);
-	mongrel2_ws_frame_set_opcode(size,frame,OP_BIN);
-	mongrel2_ws_frame_set_payload_size(size,frame,1000);
-	frame[1] |= 0x01;
-	frame[2]  = 'h';
+	// Set the mask
+	int mask_start = mongrel2_ws_frame_get_mask_start(size,frame);
+	memcpy(&frame[mask_start],&mask,sizeof(uint32_t));
+
+	return 0;
+}
+
+uint32_t mongrel2_ws_frame_get_mask(size_t size, uint8_t *frame){
+	assert(size > 5);
+	int mask_start = mongrel2_ws_frame_get_mask_start(size,frame);
+	uint32_t retval;
+	memcpy(&retval,&frame[mask_start],sizeof(uint32_t));
+	return retval;
+}
+
+// This is broken if you are using a max payload size
+uint64_t mongrel2_ws_frame_get_size_necessary(int mask_present,uint64_t payload_size){
+	uint64_t retval = 0;
+	// fin,rsv1,rsv2,rsv3,opcode
+	retval = retval + 1;
+	// mask,payload_len(1)
+	retval = retval + 1;
+
+	if(mask_present){
+		retval = retval + 4;
+	}
+
+	if(payload_size < 126){
+		retval = retval + 2;
+	} else if (payload_size >= 126 && payload_size <= 65536){
+		retval = retval + 8;
+	} else {
+		retval = retval + 16;
+	}
+
+	return retval;
+}
+
+int mongrel2_ws_frame_create(int use_mask,uint64_t payload_size,size_t *size,uint8_t **buf){
+	*size = mongrel2_ws_frame_get_size_necessary(use_mask,payload_size);
+	*buf  = calloc(sizeof(uint8_t),*size);
+	if(*buf == NULL){
+		return -1;
+	}
+
+	mongrel2_ws_frame_set_payload_size(*size,*buf,payload_size);
+	return 0;
+}
+
+// TEST SETUP CODE
+
+void test_frame_small_no_mask(size_t *size, uint8_t **frame){
+	int retval = mongrel2_ws_frame_create(0,111,size,frame);
+	assert(retval == 0);
+
+	mongrel2_ws_frame_set_fin(*size,*frame);
+	mongrel2_ws_frame_set_opcode(*size,*frame,OP_TEXT);
+}
+
+void test_frame_small_with_mask(size_t *size, uint8_t **frame){
+	int retval = mongrel2_ws_frame_create(1,123,size,frame);
+	assert(retval == 0);
+	
+	mongrel2_ws_frame_set_fin(*size,*frame);
+	mongrel2_ws_frame_set_opcode(*size,*frame,OP_TEXT);
+	mongrel2_ws_frame_set_mask(*size,*frame,0x11FF22FF);
+}
+
+
+void test_frame_medium_no_mask(size_t *size, uint8_t **frame){
+	int retval = mongrel2_ws_frame_create(0,2000,size,frame);
+	assert(retval == 0);
+
+	mongrel2_ws_frame_set_fin(*size,*frame);
+	mongrel2_ws_frame_set_opcode(*size,*frame,OP_BIN);
+}
+
+void test_frame_large_no_mask(size_t *size, uint8_t **frame){
+	int retval = mongrel2_ws_frame_create(0,66000,size,frame);
+	assert(retval == 0);
+	
+	mongrel2_ws_frame_set_fin(*size,*frame);
+	mongrel2_ws_frame_set_opcode(*size,*frame,OP_TEXT);
 }
 
 void mongrel2_debug_frame(size_t len, uint8_t* header);
 int main(int argc, char** args){
-	// small, no mask
 	uint8_t *frame;
 	size_t size;
 
@@ -167,16 +244,25 @@ int main(int argc, char** args){
 	mongrel2_debug_frame(size,frame);
 	free(frame);
 
-	// test_frame_medium_no_mask(&size,&frame);
-	// mongrel2_debug_frame(size,frame);
-	// free(frame);
+	test_frame_medium_no_mask(&size,&frame);
+	mongrel2_debug_frame(size,frame);
+	free(frame);
 
+	test_frame_large_no_mask(&size,&frame);
+	mongrel2_debug_frame(size,frame);
+	free(frame);
+
+	test_frame_small_with_mask(&size,&frame);
+	mongrel2_debug_frame(size,frame);
+	free(frame);
 
 	return 0;
 }
 
 void mongrel2_debug_frame(size_t len, uint8_t* header){
     fprintf(stdout,"=========== BYTES ============\n");
+    printf("BYTES:   %zd\n",len);
+
     uint8_t fin    = mongrel2_ws_frame_get_fin(len,header);
     uint8_t rsrvd1 = mongrel2_ws_frame_get_rsrvd1(len,header);
     uint8_t rsrvd2 = mongrel2_ws_frame_get_rsrvd2(len,header);
@@ -204,9 +290,14 @@ void mongrel2_debug_frame(size_t len, uint8_t* header){
 
     uint8_t maskp  = mongrel2_ws_frame_get_mask_present(len,header);
     fflag msg_type = mongrel2_ws_frame_get_payload_type(len,header);
-    uint64_t msg_size = mongrel2_ws_frame_get_payload_size(len,header);
 
     printf("MASKP:   %d\n",maskp);
+        if(maskp == 1){
+    	uint32_t mask = mongrel2_ws_frame_get_mask(len,header);
+    	printf("MASK:    0x%8X\n",mask);
+	}
+
+    uint64_t msg_size = mongrel2_ws_frame_get_payload_size(len,header);
     switch(msg_type){
     	case SMALL:
     		printf("SIZE:    SMALL\n");
