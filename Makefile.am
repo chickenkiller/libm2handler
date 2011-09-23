@@ -14,10 +14,12 @@ libm2handler_la_LIBADD          = libbstr.la
 libm2handler_la_includedir      = $(includedir)/m2handler
 libm2handler_la_include_HEADERS = src/handler.h \
                                   src/websocket.h \
+                                  src/websocket_framing.h \
                                   src/debug.h
 
 libm2handler_la_SOURCES = src/handler.c \
                           src/websocket.c \
+                          src/websocket_framing.c \
                           src/sha1/sha1.c \
                           src/debug.c
 
