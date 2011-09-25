@@ -9,6 +9,7 @@
 #include <stdlib.h>
 #include "handler.h"
 #include "websocket.h"
+#include "websocket_framing.h"
 #include "sha1/sha1.h"
 
 #define START_CHAR (unsigned char)0x00
@@ -25,7 +26,7 @@ static const char* WEBSOCKET_08_UPGRADE =
     "HTTP/1.1 101 Switching Protocols\r\n"
     "Upgrade: websocket\r\n"
     "Connection: Upgrade\r\n"
-    "Sec-WebSocket-Accept: %*s\r\n";
+    "Sec-WebSocket-Accept: %*s\r\n\r\n";
 static const char* WEBSOCKET_08_KEY      = "sec-websocket-key";
 // static const char* WEBSOCKET_08_ORIGIN   = "sec-websocket-origin";
 // static const char* WEBSOCKET_08_PROTOCOL = "sec-websocket-protocol";
@@ -56,8 +57,8 @@ bstring mongrel2_ws_08_upgrade_headers(mongrel2_request *req){
         return NULL;
     }
     bstring headers = bformat(WEBSOCKET_08_UPGRADE,blength(accept),bdata(accept));
-    fprintf(stdout,"upgrade headers\n=====\n%*s\n====\n",blength(headers),bdata(headers));
-    fprintf(stdout,"accept\n=====\n%*s\n====\n",blength(accept),bdata(accept));
+    //fprintf(stdout,"upgrade headers\n=====\n%*s\n====\n",blength(headers),bdata(headers));
+    //fprintf(stdout,"accept\n=====\n%*s\n====\n",blength(accept),bdata(accept));
 
     bdestroy(accept);
 
@@ -65,14 +66,30 @@ bstring mongrel2_ws_08_upgrade_headers(mongrel2_request *req){
 }
 
 int mongrel2_ws_reply(mongrel2_socket *pub_socket, mongrel2_request *req, bstring data){
-    bstring payload = bstrcpy(data);
+    size_t req_len = blength(data);
+    uint8_t *req_data = (uint8_t*)bdata(data);
 
-    // ! and # are the fill characters. You should not see these if the data is correct
-    bInsertChrs(payload, blength(payload), 1, TERM_CHAR, '!');
-    bInsertChrs(payload, 0, 1, START_CHAR, '#');
-    mongrel2_reply(pub_socket,req,payload);
-    // mongrel2_ws_debug(payload);
-    bdestroy(payload);
+    size_t payload_len = 0;
+    uint8_t *payload_data = NULL;
+
+    int retval = mongrel2_ws_frame_create(0,req_len,&payload_len,&payload_data);
+
+    if(retval != 0){
+        fprintf(stderr,"mongrel2_ws_reply failed with errno %d\n",retval);
+        return -1;
+    }
+    mongrel2_ws_frame_set_payload(payload_len,payload_data,req_len,req_data);
+    mongrel2_ws_frame_set_opcode(payload_len,payload_data,OP_TEXT);
+    mongrel2_ws_frame_set_fin(payload_len,payload_data);
+
+    mongrel2_ws_frame_debug(payload_len,payload_data);
+
+    bstring outgoing = bfromcstralloc((int)payload_len, (char*)payload_data);
+
+    mongrel2_reply(pub_socket,req,outgoing);
+    free(payload_data);
+
+    bdestroy(outgoing);
     return 0;
 }
 

@@ -11,6 +11,7 @@
 
 #include "handler.h"
 #include "websocket.h"
+#include "websocket_framing.h"
 
 // Static function definitions
 static const struct tagbstring SENDER = bsStatic("82209006-86FF-4982-B5EA-D1E29E55D483");
@@ -61,12 +62,17 @@ int main(int argc, char **args){
             request = mongrel2_recv(pull_socket);
             fprintf(stdout,"got something...\n");
             if(request != NULL && mongrel2_request_for_disconnect(request) != 1){
+                printf("Got a request with length: %d\n",blength(request->body));
                 mongrel2_ws_reply_upgrade(request,pub_socket);
-                bstring msg = bformat("{\"msg\" : \"hi there %d\"}", request->conn_id);
-                fprintf(stdout,"Sending new msg: '%*s'",blength(msg),bdata(msg));
-                mongrel2_ws_reply(pub_socket,request,msg);
-                bdestroy(msg);
-                mongrel2_request_finalize(request);
+                if(blength(request->body) > 0){
+                    mongrel2_ws_frame_debug(blength(request->body),(uint8_t*)bdata(request->body));
+                }
+                // bstring msg = bformat("{\"msg\" : \"hi there %d\"}", request->conn_id);
+                // fprintf(stdout,"Sending new msg: '%*s'",blength(msg),bdata(msg));
+                // mongrel2_ws_reply(pub_socket,request,msg);
+                // bdestroy(msg);
+                // mongrel2_request_finalize(request);
+                // mongrel2_reply(pub_socket,request,bfromcstr(""));
             } else {
                 fprintf(stdout,"Connection %d disconnected\n", request->conn_id);
             }

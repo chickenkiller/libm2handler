@@ -11,11 +11,11 @@ enum fflag_t {
 	OP_CONT  = 0,
 	OP_TEXT  = 1,
 	OP_BIN   = 2,
+	OP_CLOSE = 8,
+	OP_PING  = 9,
+	OP_PONG  = 10,
 	MASK     = 1,
-	NO_MASK  = 0,
-	CLOSE    = 8,
-	PING     = 9,
-	PONG     = 10,
+	NO_MASK  = 0
 };
 typedef enum fflag_t fflag;
 
@@ -33,6 +33,7 @@ int mongrel2_ws_frame_set_opcode(size_t len, uint8_t* frame, fflag opcode);
 
 int mongrel2_ws_frame_set_mask(size_t size, uint8_t *frame,uint32_t mask);
 uint32_t mongrel2_ws_frame_get_mask(size_t size, uint8_t *frame);
+int mongrel2_ws_frame_unmask(uint32_t mask, size_t size, uint8_t *frame);
 
 ftype mongrel2_ws_frame_get_payload_type(size_t len, uint8_t* frame);
 uint64_t mongrel2_ws_frame_get_payload_size(size_t len, uint8_t *frame);

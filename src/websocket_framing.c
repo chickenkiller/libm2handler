@@ -170,8 +170,10 @@ static uint8_t mongrel2_ws_frame_get_mask_present(size_t len, uint8_t* frame){
 }
 
 static int mongrel2_ws_frame_get_mask_start(size_t size, uint8_t *frame){
-	if (size < 5 || mongrel2_ws_frame_get_mask_present(size,frame) != 1){
-		return -1;
+	if (size < 5){
+		return -2;
+	} else if ((mongrel2_ws_frame_get_mask_present(size,frame)) != 1){
+		return -3;
 	}
 
 	int mask_start = 2;
@@ -197,7 +199,10 @@ int mongrel2_ws_frame_set_mask(size_t size, uint8_t *frame,uint32_t mask){
 	#endif
 	assert(size > 5);
 
-	// Set the mask
+	// Set the mask only if we have that flag set. If they did not say so ahead
+	// of time we have the wrong amount of memory allocated.
+	// TODO: Let this be a safe state -- we would need to allow the modification of frame.
+	// so a **frame would be necessary. Nah!
 	int mask_start = mongrel2_ws_frame_get_mask_start(size,frame);
 	#ifndef NDEBUG
 	printf("MASK_START:   %d\n",mask_start);
@@ -229,6 +234,14 @@ uint32_t mongrel2_ws_frame_get_mask(size_t size, uint8_t *frame){
 	uint32_t retval;
 	memcpy(&retval,&frame[mask_start],sizeof(uint32_t));
 	return retval;
+}
+
+int mongrel2_ws_frame_unmask(uint32_t mask, size_t size, uint8_t *frame){
+	uint8_t *mask_i = (uint8_t*)(&mask);
+	for(int i=0; i<size; i++){
+		frame[i] = frame[i] ^ mask_i[i%4];
+	}
+	return 0;
 }
 
 /**
@@ -300,17 +313,27 @@ void mongrel2_ws_frame_debug(size_t len, uint8_t* header){
     	case OP_BIN:
 	    	printf("OPCODE:  OP_BIN\n");
 	    	break;
+	    case OP_CLOSE:
+	    	printf("OPCODE:  OP_CLOSE\n");
+	    	break;
+	    case OP_PING:
+	    	printf("OPCODE:  OP_PING\n");
+	    	break;
+	    case OP_PONG:
+	    	printf("OPCODE:  OP_PONG\n");
+	    	break;
     	default:
-    		printf("OPCODE:  UNKNOWN!\n");
+    		printf("OPCODE:  UNKNOWN: %d\n",opcode);
     }
 
 
     uint8_t maskp  = mongrel2_ws_frame_get_mask_present(len,header);
     fflag msg_type = mongrel2_ws_frame_get_payload_type(len,header);
 
+    uint32_t mask = 0;
     printf("MASKP:   %d\n",maskp);
         if(maskp == 1){
-    	uint32_t mask = mongrel2_ws_frame_get_mask(len,header);
+    	mask = mongrel2_ws_frame_get_mask(len,header);
     	printf("MASK:    0x%8X\n",mask);
 	}
 
@@ -336,8 +359,15 @@ void mongrel2_ws_frame_debug(size_t len, uint8_t* header){
     mongrel2_ws_frame_get_payload(len,header,&size,&payload);
     if(size > 0 && size < 60 && payload != NULL){
     	printf("MSG:     %*s\n",(int)size,payload);
+    	if(maskp == 1){
+    		uint8_t *unmasked = calloc(size,sizeof(uint8_t));
+    		memcpy(unmasked,payload,size);
+    		mongrel2_ws_frame_unmask(mask,size,unmasked);
+    		printf("UNMASKED: %.*s\n",(int)size,unmasked);
+    		free(unmasked);
+    	}
     } else if (size > 0){
-    	printf("MSG:     (TOO BIG TO SHOW)\n");
+    	printf("MSG:     %*s\n",60,payload);
     }
 
     fprintf(stdout,"==============================\n");
