@@ -22,7 +22,14 @@
   </script>
   <script type="text/javascript">
     var ws_open = function(){
-      ws = new WebSocket("ws://localhost:6767/ws_handler");
+      var SOCKET_ADDR = "ws://localhost:6767/ws_handler";
+      var webSocket;
+      if ( $.browser.mozilla ) {
+        ws = new MozWebSocket(SOCKET_ADDR);
+      } else {
+        ws = new WebSocket(SOCKET_ADDR);
+      }
+
       ws.onopen = function(){
         $("td#status").html("connected");
       };
