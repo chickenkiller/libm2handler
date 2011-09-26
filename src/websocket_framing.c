@@ -143,13 +143,9 @@ static int mongrel2_ws_frame_get_payload_start(size_t size, uint8_t *frame){
 
 int mongrel2_ws_frame_set_payload(size_t size, uint8_t *frame, uint64_t i_size, uint8_t *incoming){
 	int payload_start = mongrel2_ws_frame_get_payload_start(size,frame);
-	#ifndef NDEBUG
-	printf("&frame[%d] =   incoming\n",payload_start);
-	#endif
 	memcpy(&(frame[payload_start]),incoming,i_size);
 
 	return 0;
-	
 }
 
 int mongrel2_ws_frame_get_payload(size_t size, uint8_t *frame, size_t *osize, uint8_t **opayload){
