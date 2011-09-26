@@ -56,7 +56,6 @@ static int compare_session(const void *ses1_void, const void *ses2_void){
 }
 
 static dnode_t *alloc_dict(void *notused) {
-    printf("Asked to allocate\n");
     return (dnode_t *)calloc(sizeof(dnode_t), 1);
 }
 
@@ -101,7 +100,7 @@ int main(int argc, char **args){
 
     dnode_t* tempnode = NULL;
     m2_ws_session_data *counter = NULL;
-    // int retval = 0;
+    int retval = 0;
     while(shutdown != 1){
         poll_response = zmq_poll(&socket_tracker,1,500*1000);
         if(poll_response > 0){
@@ -115,11 +114,11 @@ int main(int argc, char **args){
                 tempnode = dict_lookup(dict,incoming);
 
                 if(tempnode == NULL){
-                    printf("##### New connection #####\n");
                     mongrel2_ws_reply_upgrade(request,pub_socket);
                     counter = calloc(1,sizeof(m2_ws_session_data));
                     counter->times_seen = 0;
-                    assert(dict_alloc_insert(dict,incoming,counter) == 1);
+                    retval = dict_alloc_insert(dict,incoming,counter);
+                    assert(retval == 1);
                 } else {
                     free(incoming);
                     counter = dnode_get(tempnode);
