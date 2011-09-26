@@ -142,7 +142,7 @@ int mongrel2_connect(mongrel2_socket* socket, const char* dest){
  * @return
  */
 mongrel2_request *mongrel2_parse_request(bstring raw_request_bstr){
-  #ifdef DEBUG
+  #ifndef NDEBUG
   fprintf(stdout, "======NETSTRING======\n");
   fprintf(stdout, "%.*s\n",blength(raw_request_bstr),bdata(raw_request_bstr));
   fprintf(stdout, "=====================\n");
@@ -165,7 +165,7 @@ mongrel2_request *mongrel2_parse_request(bstring raw_request_bstr){
   euuid = binchr(raw_request_bstr, suuid, &SPACE);
   req->uuid = bmidstr(raw_request_bstr, suuid, euuid-suuid);
   if(req->uuid == NULL){
-      fprintf(stderr,"Could not extract UUID!");
+      fprintf(stderr,"Could not extract UUID!\n");
       goto error;
   }
 
@@ -174,7 +174,7 @@ mongrel2_request *mongrel2_parse_request(bstring raw_request_bstr){
   econnid = binchr(raw_request_bstr, sconnid, &SPACE);
   req->conn_id_bstr = bmidstr(raw_request_bstr,sconnid,econnid-sconnid);
   if(req->conn_id_bstr == NULL){
-      fprintf(stderr, "Could not extract connection id");
+      fprintf(stderr, "Could not extract connection id\n");
       goto error;
   }
   sscanf(bdata(req->conn_id_bstr),"%d",&req->conn_id);
@@ -184,7 +184,7 @@ mongrel2_request *mongrel2_parse_request(bstring raw_request_bstr){
   epath = binchr(raw_request_bstr, spath, &SPACE);
   req->path = bmidstr(raw_request_bstr,spath,epath-spath);
   if(req->path == NULL){
-      fprintf(stderr, "Could not extract Path");
+      fprintf(stderr, "Could not extract Path\n");
       goto error;
   }
 
@@ -203,10 +203,10 @@ mongrel2_request *mongrel2_parse_request(bstring raw_request_bstr){
   eheader = sheader+headerlen;
   req->raw_headers = bmidstr(raw_request_bstr,sheader,eheader-sheader);
   if(req->raw_headers == NULL){
-      fprintf(stderr,"could not extract headers");
+      fprintf(stderr,"could not extract headers\n");
       goto error;
   } else if(blength(req->raw_headers) != headerlen){
-      fprintf(stderr,"Expected headerlen to be %d, got %d",headerlen,blength(req->raw_headers));
+      fprintf(stderr,"Expected headerlen to be %d, got %d\n",headerlen,blength(req->raw_headers));
       goto error;
   }
 
@@ -225,14 +225,14 @@ mongrel2_request *mongrel2_parse_request(bstring raw_request_bstr){
   ebody = sbody+bodylen;
   req->body = bmidstr(raw_request_bstr,sbody,ebody-sbody);
   if(req->body == NULL){
-      fprintf(stderr,"could not extract body");
+      fprintf(stderr,"could not extract body\n");
       goto error;
   } else if(blength(req->body) != bodylen){
-      fprintf(stderr,"Expected body to be %d, got %d",bodylen,blength(req->body));
+      fprintf(stderr,"Expected body to be %d, got %d\n",bodylen,blength(req->body));
       goto error;
   }
 
-  #ifdef DEBUG
+  #ifndef NDEBUG
   fprintf(stdout,"========PARSE_NETSTRING=========\n");
   fprintf(stdout,"SERVER_UUID: %s\n",bdata(req->uuid));
   fprintf(stdout,"CONNECTION_ID: %d\n",req->conn_id);
@@ -302,7 +302,7 @@ int mongrel2_send(mongrel2_socket *pub_socket, bstring response){
     zmq_msg_close(msg);
     free(msg);
 
-    #ifdef DEBUG
+    #ifndef NDEBUG
     fprintf(stdout,"=======MONGREL2_SEND==========\n");
     fprintf(stdout,"''%.*s''\n",blength(response),bdata(response));
     fprintf(stdout,"==============================\n");

@@ -8,6 +8,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "handler.h"
+#include "debug.h"
 #include "websocket.h"
 #include "websocket_framing.h"
 #include "sha1/sha1.h"
@@ -82,7 +83,9 @@ int mongrel2_ws_reply(mongrel2_socket *pub_socket, mongrel2_request *req, bstrin
     mongrel2_ws_frame_set_opcode(payload_len,payload_data,OP_TEXT);
     mongrel2_ws_frame_set_fin(payload_len,payload_data);
 
+    #ifndef NDEBUG
     mongrel2_ws_frame_debug(payload_len,payload_data);
+    #endif
 
     bstring outgoing = bfromcstralloc((int)payload_len, (char*)payload_data);
 

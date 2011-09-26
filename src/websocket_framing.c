@@ -8,6 +8,7 @@
 #include <string.h>
 #include <assert.h>
 
+#include "debug.h"
 #include "websocket_framing.h"
 
 /**
@@ -26,17 +27,17 @@ uint8_t mongrel2_ws_frame_get_fin(size_t len, uint8_t* frame){
     return ((frame[0] & 0x80) >> 7);
 }
 
-static uint8_t mongrel2_ws_frame_get_rsrvd1(size_t len, uint8_t* frame){
+uint8_t mongrel2_ws_frame_get_rsrvd1(size_t len, uint8_t* frame){
     assert(len > 0);
     return ((frame[0] & 0x40) >> 6);
 }
 
-static uint8_t mongrel2_ws_frame_get_rsrvd2(size_t len, uint8_t* frame){
+uint8_t mongrel2_ws_frame_get_rsrvd2(size_t len, uint8_t* frame){
     assert(len > 0);
     return ((frame[0] & 0x20) >> 5);
 }
 
-static uint8_t mongrel2_ws_frame_get_rsrvd3(size_t len, uint8_t* frame){
+uint8_t mongrel2_ws_frame_get_rsrvd3(size_t len, uint8_t* frame){
     assert(len > 0);
     return ((frame[0] & 0x10) >> 4);
 }
@@ -110,7 +111,6 @@ uint64_t mongrel2_ws_frame_get_payload_size(size_t len, uint8_t *frame){
 }
 
 // Future defs to keep things clean
-static uint8_t mongrel2_ws_frame_get_mask_present(size_t len, uint8_t* frame);
 static int mongrel2_ws_frame_get_mask_start(size_t size, uint8_t *frame);
 static int mongrel2_ws_frame_get_payload_start(size_t size, uint8_t *frame){
 	ftype type = mongrel2_ws_frame_get_payload_type(size,frame);
@@ -165,7 +165,7 @@ int mongrel2_ws_frame_get_payload(size_t size, uint8_t *frame, size_t *osize, ui
  *   MASK FUNCTIONALITY
  **/
 
-static uint8_t mongrel2_ws_frame_get_mask_present(size_t len, uint8_t* frame){
+uint8_t mongrel2_ws_frame_get_mask_present(size_t len, uint8_t* frame){
     assert(len > 1);
     return ((frame[1] & MASK) >> 7);
 }
@@ -288,88 +288,4 @@ int mongrel2_ws_frame_create(int use_mask,uint64_t payload_size,size_t *size,uin
 		// They will set the mask later. Otherwise it's zero!
 	}
 	return 0;
-}
-
-void mongrel2_ws_frame_debug(size_t len, uint8_t* header){
-    fprintf(stdout,"=========== BYTES ============\n");
-    printf("BYTES:   %zd\n",len);
-
-    uint8_t fin    = mongrel2_ws_frame_get_fin(len,header);
-    uint8_t rsrvd1 = mongrel2_ws_frame_get_rsrvd1(len,header);
-    uint8_t rsrvd2 = mongrel2_ws_frame_get_rsrvd2(len,header);
-    uint8_t rsrvd3 = mongrel2_ws_frame_get_rsrvd3(len,header);
-    printf("FIN:     %d\n",fin);
-    printf("RSRVD1:  %d\n",rsrvd1);
-    printf("RSRVD2:  %d\n",rsrvd2);
-    printf("RSRVD3:  %d\n",rsrvd3);
-
-    uint8_t opcode = mongrel2_ws_frame_get_opcode(len,header);
-    switch(opcode){
-    	case OP_CONT:
-	    	printf("OPCODE:  OP_CONT\n");
-	    	break;
-    	case OP_TEXT:
-	    	printf("OPCODE:  OP_TEXT\n");
-	    	break;
-    	case OP_BIN:
-	    	printf("OPCODE:  OP_BIN\n");
-	    	break;
-	    case OP_CLOSE:
-	    	printf("OPCODE:  OP_CLOSE\n");
-	    	break;
-	    case OP_PING:
-	    	printf("OPCODE:  OP_PING\n");
-	    	break;
-	    case OP_PONG:
-	    	printf("OPCODE:  OP_PONG\n");
-	    	break;
-    	default:
-    		printf("OPCODE:  UNKNOWN: %d\n",opcode);
-    }
-
-
-    uint8_t maskp  = mongrel2_ws_frame_get_mask_present(len,header);
-    fflag msg_type = mongrel2_ws_frame_get_payload_type(len,header);
-
-    uint32_t mask = 0;
-    printf("MASKP:   %d\n",maskp);
-        if(maskp == 1){
-    	mask = mongrel2_ws_frame_get_mask(len,header);
-    	printf("MASK:    0x%8X\n",mask);
-	}
-
-    uint64_t msg_size = mongrel2_ws_frame_get_payload_size(len,header);
-    switch(msg_type){
-    	case SMALL:
-    		printf("SIZE:    SMALL\n");
-    		break;
-    	case MEDIUM:
-    		printf("SIZE:    MEDIUM\n");
-    		break;
-    	case LARGE:
-    		printf("SIZE:    LARGE\n");
-    		break;
-    	default:
-    		printf("SIZE:    UNKNOWN!");
-    		break;
-    }
-    printf("MSG_SIZE:%lld\n",msg_size);
-
-    uint8_t *payload = NULL;
-    size_t size = 0;
-    mongrel2_ws_frame_get_payload(len,header,&size,&payload);
-    if(size > 0 && size < 60 && payload != NULL){
-    	printf("MSG:     %*s\n",(int)size,payload);
-    	if(maskp == 1){
-    		uint8_t *unmasked = calloc(size,sizeof(uint8_t));
-    		memcpy(unmasked,payload,size);
-    		mongrel2_ws_frame_unmask(mask,size,unmasked);
-    		printf("UNMASKED: %.*s\n",(int)size,unmasked);
-    		free(unmasked);
-    	}
-    } else if (size > 0){
-    	printf("MSG:     %*s\n",60,payload);
-    }
-
-    fprintf(stdout,"==============================\n");
 }

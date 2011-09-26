@@ -3,10 +3,8 @@
 #include <handler.h>
 #include <websocket.h>
 #include <websocket_framing.h>
-// #include <debug.h>
 
-// TEST SETUP CODE
-
+#ifndef NDEBUG
 void test_frame_small_no_mask(size_t *size, uint8_t **frame){
 	int retval = mongrel2_ws_frame_create(0,111,size,frame);
 	assert(retval == 0);
@@ -100,3 +98,9 @@ int main(int argc, char** args){
 
 	return 0;
 }
+#else
+int main(int argc, char** args){
+	printf("Must compile with NDEBUG\n");
+	return -1;
+}
+#endif
