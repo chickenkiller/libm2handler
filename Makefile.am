@@ -1,5 +1,5 @@
 lib_LTLIBRARIES = libm2handler.la
-noinst_LTLIBRARIES = libbstr.la
+noinst_LTLIBRARIES = libbstr.la libdict.la
 noinst_bindir = `pwd`/example/bin
 noinst_bin_PROGRAMS = $(sample_handlers) \
 					  $(test_programs)
@@ -7,10 +7,10 @@ noinst_bin_PROGRAMS = $(sample_handlers) \
 AM_CFLAGS=-g -std=gnu99 -Wall -Werror -I. -Imd5/ -Ibstr/ -I/opt/local/include
 
 sample_handlers=body_toupper daemon_to_upper fifo_reader ws_handshake
-test_programs=ws_accept framing
+test_programs=ws_accept framing dict
 
 libm2handler_la_LDFLAGS         = -lzmq -ljansson
-libm2handler_la_LIBADD          = libbstr.la
+libm2handler_la_LIBADD          = libbstr.la libdict.la
 libm2handler_la_includedir      = $(includedir)/m2handler
 libm2handler_la_include_HEADERS = src/handler.h \
                                   src/websocket.h \
@@ -28,6 +28,10 @@ libbstr_la_include_HEADERS = src/bstr/bstrlib.h \
                              src/bstr/bstraux.h
 libbstr_la_SOURCES         = src/bstr/bstrlib.c \
                              src/bstr/bstraux.c
+
+libdict_la_includedir      = $(includedir)/src/adt
+libdict_la_include_HEADERS = src/adt/dict.h
+libdict_la_SOURCES         = src/adt/dict.c
 
 handlerdir = example/handlers
 body_toupper_CPPFLAGS     = -Isrc/
@@ -58,5 +62,10 @@ ws_accept_SOURCES         = $(testdir)/ws_accept.c
 
 framing_CPPFLAGS          = -Isrc/
 framing_DEPENDENCIES      = libm2handler.la
-framing_LDADD			  = -lm2handler
+framing_LDADD			        = -lm2handler
 framing_SOURCES           = $(testdir)/framing.c
+
+dict_CPPFLAGS             = -Isrc/
+dict_DEPENDENCIES         = libm2handler.la
+dict_LDADD                = -lm2handler
+dict_SOURCES              = $(testdir)/dict.c
