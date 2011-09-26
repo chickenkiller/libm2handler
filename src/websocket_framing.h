@@ -14,8 +14,7 @@ enum fflag_t {
 	OP_CLOSE = 8,
 	OP_PING  = 9,
 	OP_PONG  = 10,
-	MASK     = 1,
-	NO_MASK  = 0
+	MASK     = 0x80,
 };
 typedef enum fflag_t fflag;
 

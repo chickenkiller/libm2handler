@@ -11,7 +11,6 @@
 #define	M2WEBSOCKET_H
 
 int mongrel2_ws_reply_upgrade(mongrel2_request *req, mongrel2_socket *socket);
-
 int mongrel2_ws_reply(mongrel2_socket *pub_socket, mongrel2_request *req, bstring data);
 
 // Expose to aid testing

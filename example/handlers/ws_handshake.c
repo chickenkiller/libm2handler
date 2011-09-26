@@ -8,6 +8,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <signal.h>
+#include <assert.h>
 
 #include "handler.h"
 #include "websocket.h"
@@ -16,10 +17,20 @@
 
 // Static function definitions
 static const struct tagbstring SENDER = bsStatic("82209006-86FF-4982-B5EA-D1E29E55D483");
+static const struct tagbstring HELLO = bsStatic("Hi there");
 
 // Shared variables
 static mongrel2_socket *pub_socket;
 static int shutdown = 0;
+
+// Temporary struct definition
+typedef struct m2_ws_session_id_t {
+    int conn_id;
+} m2_ws_session_id;
+
+typedef struct m2_ws_session_data_t {
+    int times_seen;
+} m2_ws_session_data;
 
 static void call_for_stop(int sig_id){
     if(sig_id == SIGINT){
@@ -31,18 +42,31 @@ static void call_for_stop(int sig_id){
     }
 }
 
-int compare_request(const void *req1_void, const void *req2_void){
-    mongrel2_request *req1 = (mongrel2_request*)req1_void;
-    mongrel2_request *req2 = (mongrel2_request*)req2_void;
-    printf("Comparing %d and %d\n",req1->conn_id, req2->conn_id);
-    if(req1->conn_id > req2->conn_id){
+static int compare_session(const void *ses1_void, const void *ses2_void){
+    m2_ws_session_id *ses1 = (m2_ws_session_id*)ses1_void;
+    m2_ws_session_id *ses2 = (m2_ws_session_id*)ses2_void;
+    printf("Comparing %d and %d\n",ses1->conn_id, ses2->conn_id);
+    if(ses1->conn_id > ses2->conn_id){
         return 1;
-    } else if(req1->conn_id < req2->conn_id){
+    } else if(ses1->conn_id < ses2->conn_id){
         return -1;
     } else {
-        printf("Returning 0\n");
         return 0;
     }
+}
+
+static dnode_t *alloc_dict(void *notused) {
+    printf("Asked to allocate\n");
+    return (dnode_t *)calloc(sizeof(dnode_t), 1);
+}
+
+static void free_dict(dnode_t *node, void *notused) {
+    m2_ws_session_id *keyptr = (m2_ws_session_id*)dnode_getkey(node);
+    m2_ws_session_data *valptr = (m2_ws_session_data*)dnode_get(node);
+    printf("Freeing conn_id = %d, seen %d times\n",keyptr->conn_id,valptr->times_seen);
+    free(keyptr);
+    free(valptr);
+    free(node);
 }
 
 int main(int argc, char **args){
@@ -72,11 +96,12 @@ int main(int argc, char **args){
     socket_tracker.events = ZMQ_POLLIN;
 
     // Let's try out some ADT goodness
-    dict_t* dict = dict_create(DICTCOUNT_T_MAX, compare_request);
-    dict_allow_dupes(dict);
-    
+    dict_t* dict = dict_create(DICTCOUNT_T_MAX, compare_session);
+    dict_set_allocator(dict, alloc_dict, free_dict, NULL);
 
-    dnode_t *incoming;
+    dnode_t* tempnode = NULL;
+    m2_ws_session_data *counter = NULL;
+    // int retval = 0;
     while(shutdown != 1){
         poll_response = zmq_poll(&socket_tracker,1,500*1000);
         if(poll_response > 0){
@@ -84,20 +109,33 @@ int main(int argc, char **args){
             fprintf(stdout,"got something...\n");
 
             if(request != NULL && mongrel2_request_for_disconnect(request) != 1){
-                incoming = dnode_create(request);
+                m2_ws_session_id* incoming = calloc(1,sizeof(m2_ws_session_id));
+                incoming->conn_id = request->conn_id;
+                printf("Looking at incoming->conn_id = %d\n",incoming->conn_id);
+                tempnode = dict_lookup(dict,incoming);
 
-                if(dict_contains(dict,incoming)){
-                    printf("!!!! Hey, we've already seen this request! It must be good.\n");
-                } else {
-                    printf("New request... whoopie!\n");
+                if(tempnode == NULL){
+                    printf("##### New connection #####\n");
                     mongrel2_ws_reply_upgrade(request,pub_socket);
-                    dict_insert(dict,incoming,request);
+                    counter = calloc(1,sizeof(m2_ws_session_data));
+                    counter->times_seen = 0;
+                    assert(dict_alloc_insert(dict,incoming,counter) == 1);
+                } else {
+                    free(incoming);
+                    counter = dnode_get(tempnode);
+                    counter->times_seen += 1;
                 }
 
                 if(blength(request->body) > 0){
-                    mongrel2_ws_frame_debug(blength(request->body),(uint8_t*)bdata(request->body));
+                    // mongrel2_ws_frame_debug(blength(request->body),(uint8_t*)bdata(request->body));
+                    if(tempnode && mongrel2_ws_frame_get_fin(blength(request->body),(uint8_t*)bdata(request->body))){
+                        printf("Hey, it's a close\n");
+                        dict_delete_free(dict,tempnode);
+                        mongrel2_disconnect(pub_socket,request);
+                    }
+                } else {
+                    mongrel2_ws_reply(pub_socket,request,(const bstring)&HELLO);
                 }
-
                 
 
                 printf("FYI: we've got %ld entries\n",dict_count(dict));

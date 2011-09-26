@@ -16,38 +16,39 @@
 
 int mongrel2_ws_frame_set_fin(size_t len, uint8_t* frame){
 	assert(len > 0);
-	frame[0]  = FIN;
+	assert(FIN == 0x01);
+	frame[0] |= (0x01 << 7);
 	return 0;
 }
 
 uint8_t mongrel2_ws_frame_get_fin(size_t len, uint8_t* frame){
     assert(len > 0);
-    return ((frame[0] & 0x01) >> 0);
+    return ((frame[0] & 0x80) >> 7);
 }
 
 static uint8_t mongrel2_ws_frame_get_rsrvd1(size_t len, uint8_t* frame){
     assert(len > 0);
-    return ((frame[0] & 0x02) >> 1);
+    return ((frame[0] & 0x40) >> 6);
 }
 
 static uint8_t mongrel2_ws_frame_get_rsrvd2(size_t len, uint8_t* frame){
     assert(len > 0);
-    return ((frame[0] & 0x04) >> 2);
+    return ((frame[0] & 0x20) >> 5);
 }
 
 static uint8_t mongrel2_ws_frame_get_rsrvd3(size_t len, uint8_t* frame){
     assert(len > 0);
-    return ((frame[0] & 0x08) >> 3);
+    return ((frame[0] & 0x10) >> 4);
 }
 
 uint8_t mongrel2_ws_frame_get_opcode(size_t len, uint8_t* frame){
     assert(len > 0);
-    return ((frame[0] & 0xF0) >> 4);
+    return (frame[0] & 0x0F);
 }
 
 int mongrel2_ws_frame_set_opcode(size_t len, uint8_t* frame, fflag opcode){
 	assert(len > 0);
-	frame[0] |= (opcode << 4);
+	frame[0] |= (0x0F & opcode);
 	return 0;
 }
 
@@ -166,7 +167,7 @@ int mongrel2_ws_frame_get_payload(size_t size, uint8_t *frame, size_t *osize, ui
 
 static uint8_t mongrel2_ws_frame_get_mask_present(size_t len, uint8_t* frame){
     assert(len > 1);
-    return ((frame[1] >> 7) & MASK);
+    return ((frame[1] & MASK) >> 7);
 }
 
 static int mongrel2_ws_frame_get_mask_start(size_t size, uint8_t *frame){
