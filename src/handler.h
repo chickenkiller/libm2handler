@@ -18,6 +18,10 @@
 #include "bstr/bstrlib.h"
 #include "bstr/bstraux.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 struct mongrel2_ctx_t{
     void* zmq_context;
 };
@@ -59,4 +63,9 @@ int mongrel2_disconnect(mongrel2_socket *pub_socket, mongrel2_request *req);
 
 bstring mongrel2_request_get_header(const mongrel2_request *req, const char* key);
 int mongrel2_request_finalize(mongrel2_request *req);
+
+#ifdef __cplusplus
+}
+#endif
+
 #endif

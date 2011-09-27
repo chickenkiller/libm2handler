@@ -10,6 +10,10 @@
 #ifndef M2WEBSOCKET_H
 #define	M2WEBSOCKET_H
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 int mongrel2_ws_reply_upgrade(mongrel2_request *req, mongrel2_socket *socket);
 int mongrel2_ws_reply(mongrel2_socket *pub_socket, mongrel2_request *req, bstring data);
 
@@ -17,5 +21,9 @@ int mongrel2_ws_reply(mongrel2_socket *pub_socket, mongrel2_request *req, bstrin
 // TODO: Wrap in a #DEFINE
 bstring mongrel2_ws_upgrade_headers(mongrel2_request *req);
 int mongrel2_ws_calculate_accept(mongrel2_request *req,bstring *accept);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif	/* M2WEBSOCKET_H */

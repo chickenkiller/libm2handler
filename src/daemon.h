@@ -8,7 +8,15 @@
 #ifndef M2DAEMON_H
 #define	M2DAEMON_H
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 int mongrel2_daemonize();
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif	/* M2DAEMON_H */
 

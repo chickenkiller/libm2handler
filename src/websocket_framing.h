@@ -3,6 +3,10 @@
 #include <stddef.h>
 #include <stdint.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 enum fflag_t {
 	FIN      = 1,
 	RSRVD1   = 2,

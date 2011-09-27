@@ -47,8 +47,16 @@
 #include "stdint.h"
 #include "bstr/bstrlib.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 void mongrel2_ws_frame_debug(size_t len, uint8_t* header);
 void mongrel2_bstring_debug(bstring data);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif
 #endif	/* M2DEBUG_H */
