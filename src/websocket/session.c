@@ -7,7 +7,6 @@
 #include <pthread.h>
 #include <assert.h>
 
-
 #include "adt/dict.h"
 #include "websocket/session.h"
 
