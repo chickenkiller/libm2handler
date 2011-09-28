@@ -5,10 +5,11 @@
  * Created on February 10, 2011, 3:07 PM
  */
 
-#include "stdint.h"
-
 #ifndef M2WEBSOCKET_H
 #define	M2WEBSOCKET_H
+
+#include "stdint.h"
+#include "adt/dict.h"
 
 #ifdef __cplusplus
 extern "C" {

@@ -13,6 +13,7 @@
 #include "handler.h"
 #include "websocket.h"
 #include "websocket_framing.h"
+#include "websocket_session.h"
 #include "adt/dict.h"
 
 // Static function definitions
@@ -22,15 +23,6 @@ static const struct tagbstring HELLO = bsStatic("Hi there");
 // Shared variables
 static mongrel2_socket *pub_socket;
 static int shutdown = 0;
-
-// Temporary struct definition
-typedef struct m2_ws_session_id_t {
-    int conn_id;
-} m2_ws_session_id;
-
-typedef struct m2_ws_session_data_t {
-    int times_seen;
-} m2_ws_session_data;
 
 static void call_for_stop(int sig_id){
     if(sig_id == SIGINT){
@@ -126,8 +118,8 @@ int main(int argc, char **args){
                 }
 
                 if(blength(request->body) > 0){
-                    // mongrel2_ws_frame_debug(blength(request->body),(uint8_t*)bdata(request->body));
-                    if(tempnode && mongrel2_ws_frame_get_fin(blength(request->body),(uint8_t*)bdata(request->body))){
+                    if(tempnode && mongrel2_ws_frame_get_fin(blength(request->body),
+                                                             (uint8_t*)bdata(request->body))){
                         printf("Hey, it's a close\n");
                         dict_delete_free(dict,tempnode);
                         mongrel2_disconnect(pub_socket,request);

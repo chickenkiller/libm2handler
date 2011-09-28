@@ -48,4 +48,9 @@ int mongrel2_ws_frame_set_payload(size_t size, uint8_t *frame, uint64_t i_size, 
 int mongrel2_ws_frame_get_payload(size_t size, uint8_t *frame, size_t *osize, uint8_t **opayload);
 
 int mongrel2_ws_frame_create(int use_mask,uint64_t payload_size,size_t *size,uint8_t **buf);
+
+#ifdef __cplusplus
+}
+#endif
+
 #endif
