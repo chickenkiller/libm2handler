@@ -10,6 +10,8 @@
 
 #include "stdint.h"
 #include "adt/dict.h"
+#include "websocket/framing.h"
+#include "websocket/session.h"
 
 #ifdef __cplusplus
 extern "C" {

@@ -10,7 +10,7 @@
 #include "handler.h"
 #include "debug.h"
 #include "websocket.h"
-#include "websocket_framing.h"
+#include "websocket/framing.h"
 #include "sha1/sha1.h"
 
 #define START_CHAR (unsigned char)0x00

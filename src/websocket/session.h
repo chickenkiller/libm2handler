@@ -1,8 +1,10 @@
 // Author: Xavier Lange
 // Date: 9/26/2011
 
-#ifndef M2WEBSOCKETSESSION_H
-#define M2WEBSOCKETSESSION_H
+#ifndef M2WSSESSION_H
+#define M2WSSESSION_H
+
+#include <pthread.h>
 
 #ifdef __cplusplus
 extern "C" {

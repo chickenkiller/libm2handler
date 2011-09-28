@@ -1,4 +1,5 @@
 #ifndef WEBSOCKET_FRAMING_H
+#define WEBSOCKET_FRAMING_H
 
 #include <stddef.h>
 #include <stdint.h>
