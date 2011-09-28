@@ -40,32 +40,6 @@ int mongrel2_ws_reply_upgrade(mongrel2_request *req, mongrel2_socket *socket){
     return 0;
 }
 
-bstring mongrel2_ws_upgrade_headers(mongrel2_request *req){
-    // TODO, case state on the websocket version
-    return mongrel2_ws_08_upgrade_headers(req);
-}
-
-int mongrel2_ws_calculate_accept(mongrel2_request *req, bstring *accept){
-    return mongrel2_ws_08_calculate_accept(req,accept);
-}
-
-bstring mongrel2_ws_08_upgrade_headers(mongrel2_request *req){
-    bstring accept = bfromcstr("");
-    int retval;
-
-    retval = mongrel2_ws_08_calculate_accept(req,&accept);
-    if(retval != 0){
-        return NULL;
-    }
-    bstring headers = bformat(WEBSOCKET_08_UPGRADE,blength(accept),bdata(accept));
-    //fprintf(stdout,"upgrade headers\n=====\n%*s\n====\n",blength(headers),bdata(headers));
-    //fprintf(stdout,"accept\n=====\n%*s\n====\n",blength(accept),bdata(accept));
-
-    bdestroy(accept);
-
-    return headers;
-}
-
 int mongrel2_ws_reply(mongrel2_socket *pub_socket, mongrel2_request *req, bstring data){
     size_t req_len = blength(data);
     uint8_t *req_data = (uint8_t*)bdata(data);
@@ -94,6 +68,54 @@ int mongrel2_ws_reply(mongrel2_socket *pub_socket, mongrel2_request *req, bstrin
 
     bdestroy(outgoing);
     return 0;
+}
+
+int mongrel2_ws_reply_conn_id(mongrel2_socket *pub_socket, int conn_id, bstring data){
+    return 0;    
+}
+
+int mongrel2_ws_broadcast(mongrel2_socket *pub_socket, m2_ws_sessions_state *ses, bstring data){
+    mongrel2_ws_sessions_state_lock(ses);
+
+    dnode_t *iter = dict_first(ses->dict);
+
+    while(iter != NULL){
+        printf(".");
+        iter = dict_next(ses->dict,iter);
+    }
+
+    printf(" done sending\n");
+
+    mongrel2_ws_sessions_state_unlock(ses);
+    return 0;
+}
+
+// Auxillary functions, exposed for unit testing
+
+bstring mongrel2_ws_upgrade_headers(mongrel2_request *req){
+    // TODO, case state on the websocket version
+    return mongrel2_ws_08_upgrade_headers(req);
+}
+
+int mongrel2_ws_calculate_accept(mongrel2_request *req, bstring *accept){
+    return mongrel2_ws_08_calculate_accept(req,accept);
+}
+
+static bstring mongrel2_ws_08_upgrade_headers(mongrel2_request *req){
+    bstring accept = bfromcstr("");
+    int retval;
+
+    retval = mongrel2_ws_08_calculate_accept(req,&accept);
+    if(retval != 0){
+        return NULL;
+    }
+    bstring headers = bformat(WEBSOCKET_08_UPGRADE,blength(accept),bdata(accept));
+    //fprintf(stdout,"upgrade headers\n=====\n%*s\n====\n",blength(headers),bdata(headers));
+    //fprintf(stdout,"accept\n=====\n%*s\n====\n",blength(accept),bdata(accept));
+
+    bdestroy(accept);
+
+    return headers;
 }
 
 /**

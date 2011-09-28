@@ -20,6 +20,8 @@ extern "C" {
 int mongrel2_ws_reply_upgrade(mongrel2_request *req, mongrel2_socket *socket);
 int mongrel2_ws_reply(mongrel2_socket *pub_socket, mongrel2_request *req, bstring data);
 
+int mongrel2_ws_broadcast(mongrel2_socket *pub_socket, m2_ws_sessions_state *ses, bstring data);
+
 // Expose to aid testing
 // TODO: Wrap in a #DEFINE
 bstring mongrel2_ws_upgrade_headers(mongrel2_request *req);

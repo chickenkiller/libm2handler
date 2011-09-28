@@ -37,10 +37,10 @@ static void call_for_stop(int sig_id){
 static int compare_session(const void *ses1_void, const void *ses2_void){
     m2_ws_session_id *ses1 = (m2_ws_session_id*)ses1_void;
     m2_ws_session_id *ses2 = (m2_ws_session_id*)ses2_void;
-    printf("Comparing %d and %d\n",ses1->conn_id, ses2->conn_id);
-    if(ses1->conn_id > ses2->conn_id){
+    printf("Comparing %d and %d\n",ses1->req->conn_id, ses2->req->conn_id);
+    if(ses1->req->conn_id > ses2->req->conn_id){
         return 1;
-    } else if(ses1->conn_id < ses2->conn_id){
+    } else if(ses1->req->conn_id < ses2->req->conn_id){
         return -1;
     } else {
         return 0;
@@ -54,7 +54,7 @@ static dnode_t *alloc_dict(void *notused) {
 static void free_dict(dnode_t *node, void *notused) {
     m2_ws_session_id *keyptr = (m2_ws_session_id*)dnode_getkey(node);
     m2_ws_session_data *valptr = (m2_ws_session_data*)dnode_get(node);
-    printf("Freeing conn_id = %d, seen %d times\n",keyptr->conn_id,valptr->times_seen);
+    printf("Freeing conn_id = %d, seen %d times\n",keyptr->req->conn_id,valptr->times_seen);
     free(keyptr);
     free(valptr);
     free(node);
@@ -101,8 +101,8 @@ int main(int argc, char **args){
 
             if(request != NULL && mongrel2_request_for_disconnect(request) != 1){
                 m2_ws_session_id* incoming = calloc(1,sizeof(m2_ws_session_id));
-                incoming->conn_id = request->conn_id;
-                printf("Looking at incoming->conn_id = %d\n",incoming->conn_id);
+                incoming->req = request;
+                printf("Looking at incoming->conn_id = %d\n",incoming->req->conn_id);
                 tempnode = dict_lookup(dict,incoming);
 
                 if(tempnode == NULL){

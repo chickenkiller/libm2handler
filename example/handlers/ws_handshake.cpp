@@ -62,8 +62,8 @@ int main(int argc, char **args){
 
             if(request != NULL && mongrel2_request_for_disconnect(request) != 1){
                 m2_ws_session_id* incoming = (m2_ws_session_id*)calloc(1,sizeof(m2_ws_session_id));
-                incoming->conn_id = request->conn_id;
-                printf("Looking at incoming->conn_id = %d\n",incoming->conn_id);
+                incoming->req = request;
+                printf("Looking at incoming->conn_id = %d\n",incoming->req->conn_id);
                 tempnode = dict_lookup(sessions.dict,incoming);
 
                 if(tempnode == NULL){

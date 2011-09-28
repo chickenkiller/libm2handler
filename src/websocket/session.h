@@ -6,6 +6,8 @@
 
 #include <pthread.h>
 
+#include "handler.h"
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -16,7 +18,7 @@ typedef struct m2_ws_sessions_state_t{
 } m2_ws_sessions_state;
 
 typedef struct m2_ws_session_id_t {
-    int conn_id;
+    mongrel2_request *req;
 } m2_ws_session_id;
 
 typedef struct m2_ws_session_data_t {
@@ -26,6 +28,12 @@ typedef struct m2_ws_session_data_t {
 
 int mongrel2_ws_sessions_state_init(m2_ws_sessions_state *container);
 int mongrel2_ws_sessions_state_destroy(m2_ws_sessions_state *container);
+
+int mongrel2_ws_sessions_state_add(m2_ws_sessions_state *container, mongrel2_request *req);
+int mongrel2_ws_sessions_state_remove(m2_ws_sessions_state *container, mongrel2_request *req);
+
+void mongrel2_ws_sessions_state_lock(m2_ws_sessions_state *container);
+void mongrel2_ws_sessions_state_unlock(m2_ws_sessions_state *container);
 
 #ifdef __cplusplus
 }
