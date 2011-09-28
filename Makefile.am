@@ -4,9 +4,10 @@ noinst_bindir = `pwd`/example/bin
 noinst_bin_PROGRAMS = $(sample_handlers) \
 					  $(test_programs)
 
-AM_CFLAGS=-g -std=gnu99 -Wall -Werror -I. -Imd5/ -Ibstr/ -I/opt/local/include
+AM_CFLAGS=-g -std=gnu99 -Wall -Werror -Isrc/ -I/opt/local/include
+AM_CXXFLAGS=-g -Wall -Werror -Isrc/ -I/opt/local/include
 
-sample_handlers=body_toupper daemon_to_upper fifo_reader ws_handshake
+sample_handlers=body_toupper daemon_to_upper fifo_reader ws_handshake ws_cpp_handshake
 test_programs=ws_accept framing dict
 
 libm2handler_la_LDFLAGS         = -lzmq -ljansson
@@ -14,12 +15,14 @@ libm2handler_la_LIBADD          = libbstr.la libdict.la
 libm2handler_la_includedir      = $(includedir)/m2handler
 libm2handler_la_include_HEADERS = src/handler.h \
                                   src/websocket.h \
-                                  src/websocket_framing.h \
+                                  src/websocket/framing.h \
+                                  src/websocket/session.h \
                                   src/debug.h
 
 libm2handler_la_SOURCES = src/handler.c \
                           src/websocket.c \
-                          src/websocket_framing.c \
+                          src/websocket/framing.c \
+                          src/websocket/session.c \
                           src/sha1/sha1.c \
                           src/debug.c
 
@@ -53,6 +56,11 @@ ws_handshake_CPPFLAGS     = -Isrc/
 ws_handshake_DEPENDENCIES = libm2handler.la
 ws_handshake_LDADD        = -lm2handler
 ws_handshake_SOURCES      = $(handlerdir)/ws_handshake.c
+
+ws_cpp_handshake_CPPFLAGS     = -Isrc/
+ws_cpp_handshake_DEPENDENCIES = libm2handler.la
+ws_cpp_handshake_LDADD        = -lm2handler
+ws_cpp_handshake_SOURCES      = $(handlerdir)/ws_handshake.cpp
 
 testdir = test
 ws_accept_CPPFLAGS        = -Isrc/
