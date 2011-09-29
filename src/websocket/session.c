@@ -46,14 +46,51 @@ int mongrel2_ws_sessions_state_init(m2_ws_sessions_state *state){
 }
 
 int mongrel2_ws_sessions_state_destroy(m2_ws_sessions_state *state){
+    // TODO!
 	return 0;
 }
 
+dict_t *mongrel2_ws_sessions_state_get_dict(m2_ws_sessions_state *container){
+    return container->dict;
+}
+
 int mongrel2_ws_sessions_state_add(m2_ws_sessions_state *container, mongrel2_request *req){
+    mongrel2_ws_sessions_state_lock(container);
+    m2_ws_session_id* key = calloc(1,sizeof(m2_ws_session_id));
+    key->req = req;
+    m2_ws_session_data* data = calloc(1,sizeof(*data));
+
+    int retval = dict_alloc_insert(container->dict,key,data);
+    assert(retval == 1);
+
+    mongrel2_ws_sessions_state_unlock(container);
     return 0;
 }
 int mongrel2_ws_sessions_state_remove(m2_ws_sessions_state *container, mongrel2_request *req){
+    mongrel2_ws_sessions_state_lock(container);
+    m2_ws_session_id* incoming = (m2_ws_session_id*)calloc(1,sizeof(m2_ws_session_id));
+    incoming->req = req;
+    dnode_t* tempnode = dict_lookup(container->dict,incoming);
+    dict_delete_free(container->dict,tempnode);
+
+    mongrel2_ws_sessions_state_unlock(container);
     return 0;
+}
+
+int mongrel2_ws_sessions_state_contains(m2_ws_sessions_state *container, mongrel2_request *req){
+    mongrel2_ws_sessions_state_lock(container);
+
+    printf("Looking at incoming->conn_id = %d\n",req->conn_id);
+    m2_ws_session_id* incoming = (m2_ws_session_id*)calloc(1,sizeof(m2_ws_session_id));
+    incoming->req = req;
+    dnode_t* tempnode = dict_lookup(container->dict,incoming);
+    free(incoming);
+    mongrel2_ws_sessions_state_unlock(container);
+    if(tempnode == NULL){
+        return 0;
+    } else {
+        return 1;
+    }
 }
 
 void mongrel2_ws_sessions_state_lock(m2_ws_sessions_state *container){

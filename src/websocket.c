@@ -7,6 +7,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <assert.h>
 #include "handler.h"
 #include "debug.h"
 #include "websocket.h"
@@ -70,17 +71,20 @@ int mongrel2_ws_reply(mongrel2_socket *pub_socket, mongrel2_request *req, bstrin
     return 0;
 }
 
-int mongrel2_ws_reply_conn_id(mongrel2_socket *pub_socket, int conn_id, bstring data){
-    return 0;    
-}
-
 int mongrel2_ws_broadcast(mongrel2_socket *pub_socket, m2_ws_sessions_state *ses, bstring data){
     mongrel2_ws_sessions_state_lock(ses);
 
     dnode_t *iter = dict_first(ses->dict);
 
+    const m2_ws_session_id *idptr = NULL;
+
     while(iter != NULL){
         printf(".");
+        idptr = dnode_getkey(iter);
+        assert(idptr != NULL);
+        assert(idptr->req != NULL);
+        mongrel2_ws_reply(pub_socket,idptr->req,data);
+
         iter = dict_next(ses->dict,iter);
     }
 

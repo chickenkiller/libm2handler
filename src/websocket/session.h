@@ -7,6 +7,7 @@
 #include <pthread.h>
 
 #include "handler.h"
+#include "adt/dict.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -29,8 +30,11 @@ typedef struct m2_ws_session_data_t {
 int mongrel2_ws_sessions_state_init(m2_ws_sessions_state *container);
 int mongrel2_ws_sessions_state_destroy(m2_ws_sessions_state *container);
 
+dict_t *mongrel2_ws_sessions_state_get_dict(m2_ws_sessions_state *container);
+
 int mongrel2_ws_sessions_state_add(m2_ws_sessions_state *container, mongrel2_request *req);
 int mongrel2_ws_sessions_state_remove(m2_ws_sessions_state *container, mongrel2_request *req);
+int mongrel2_ws_sessions_state_contains(m2_ws_sessions_state *container, mongrel2_request *req);
 
 void mongrel2_ws_sessions_state_lock(m2_ws_sessions_state *container);
 void mongrel2_ws_sessions_state_unlock(m2_ws_sessions_state *container);

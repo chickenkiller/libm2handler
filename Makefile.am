@@ -8,7 +8,7 @@ AM_CFLAGS=-g -std=gnu99 -Wall -Werror -Isrc/ -I/opt/local/include
 AM_CXXFLAGS=-g -Wall -Werror -Isrc/ -I/opt/local/include
 
 sample_handlers=body_toupper daemon_to_upper fifo_reader ws_handshake ws_cpp_handshake
-test_programs=ws_accept framing dict
+test_programs=ws_accept framing dict session
 
 libm2handler_la_LDFLAGS         = -lzmq -ljansson
 libm2handler_la_LIBADD          = libbstr.la libdict.la
@@ -77,3 +77,10 @@ dict_CPPFLAGS             = -Isrc/
 dict_DEPENDENCIES         = libm2handler.la
 dict_LDADD                = -lm2handler
 dict_SOURCES              = $(testdir)/dict.c
+
+session_CPPFLAGS          = -Isrc/
+session_DEPENDENCIES      = libm2handler.la
+session_LDADD             = -lm2handler
+session_SOURCES           = $(testdir)/session.c
+
+test: $(test_programs)
