@@ -1,4 +1,4 @@
-AC_INIT(libm2handler, 0.0.1)
+AC_INIT(libm2handler, 0.5.0)
 
 AC_PREREQ(2.61)
 AM_INIT_AUTOMAKE
