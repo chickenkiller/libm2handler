@@ -6,28 +6,28 @@ A C library for handling requests from Mongrel2. Includes a suite of sample hand
 
 #### mongrel2 ####
 
-    * http://www.mongrel2.org/
+    http://www.mongrel2.org/
 
 #### libjansson ####
 
-    * http://www.digip.org/jansson/
-    * https://github.com/akheron/jansson
+    http://www.digip.org/jansson/
+    https://github.com/akheron/jansson
 
-#### automake ####
-The gnu automake build system.
+#### GNU Automake ####
+The GNU automake build system.
 
 ### Building from Scratch ###
 
 You need to first translate the configure.ac to configure.
 
-    * libtoolize -c || glibtoolize -c
-    * autoreconf -fv --install
+    libtoolize -c || glibtoolize -c
+    autoreconf -fv --install
 
 Great, now you have your build system. Now to build the Makefile.
 
-    * ./configure
-    * make
-    * sudo make install
+    ./configure
+    make
+    sudo make install
 
 ### Valgrind ###
 
@@ -47,26 +47,25 @@ From inside of lib run 'make test' to build all the handlers.
 
 Test the WebSocket support
 
-    1. cd deployment && ./config.sh && ./start.sh
-    2. cd handler && make test && ./ws_handshake_handler
-    3. Use Chrome 14+ or Firefox 6+, go to http://localhost:6767/ws.html
+    cd deployment && ./config.sh && ./start.sh
+    make handlers && ./ws_handshake_handler tcp://127.0.0.1:7999 tcp://127.0.0.1:7998
+    # Use Chrome 14+ or Firefox 6+, go to http://localhost:6767/ws.html
 
 Testing body_toupper_handler
 I use three terminal sessions:
 
-    1. cd deployment && ./config.sh && ./start.sh # Mongrel2 is up
-    2. cd handler && make test && ./body_toupper_handler
-    3. curl localhost:6767/body_to_upper_handler -d "hello handler" -v
+    cd deployment && ./config.sh && ./start.sh # Mongrel2 is up
+    cd handler && make test && ./body_toupper_handler
+    curl localhost:6767/body_to_upper_handler -d "hello handler" -v
 
 # The curl session should spit back the data but capitalized.
 
 Testing fifo_reader_handler
 Now we'll use four sessions
     
-    1. As before
-    2. cd handler && make test && ./fifo_reader_handler
-    3. curl http://localhost:6767/fifo_reader_handler
-    4. cd handler && cat Makefile > handler_pipe
+    cd handler && make test && ./fifo_reader_handler
+    curl http://localhost:6767/fifo_reader_handler
+    cd handler && cat Makefile > handler_pipe
 
 You will see the Makefile in the curl session.
 

@@ -84,3 +84,5 @@ session_LDADD             = -lm2handler
 session_SOURCES           = $(testdir)/session.c
 
 test: $(test_programs)
+
+handlers: $(sample_handlers)
