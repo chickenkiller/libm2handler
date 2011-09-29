@@ -192,7 +192,7 @@ static int mongrel2_ws_frame_get_mask_start(size_t size, uint8_t *frame){
 int mongrel2_ws_frame_set_mask(size_t size, uint8_t *frame,uint32_t mask){
 	#ifndef NDEBUG
 	printf("FRAME SIZE  : %zd\n",size);
-	printf("SIZEOF(mask): %ld\n",sizeof(mask));
+	printf("SIZEOF(mask): %zd\n",sizeof(mask));
 	#endif
 	assert(size > 5);
 
