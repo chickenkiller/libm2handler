@@ -6,13 +6,12 @@ A C library for handling requests from Mongrel2. Includes a suite of sample hand
 
 #### mongrel2 ####
 
-    http://www.mongrel2.org/
+    * http://www.mongrel2.org/
 
 #### libjansson ####
 
-    http://www.digip.org/jansson/
-
-    https://github.com/akheron/jansson
+    * http://www.digip.org/jansson/
+    * https://github.com/akheron/jansson
 
 #### automake ####
 The gnu automake build system.
@@ -21,17 +20,14 @@ The gnu automake build system.
 
 You need to first translate the configure.ac to configure.
 
-    libtoolize -c || glibtoolize -c
-
-    autoreconf -fv --install
+    * libtoolize -c || glibtoolize -c
+    * autoreconf -fv --install
 
 Great, now you have your build system. Now to build the Makefile.
 
-    ./configure
-
-    make
-
-    sudo make install
+    * ./configure
+    * make
+    * sudo make install
 
 ### Valgrind ###
 
@@ -71,7 +67,7 @@ Now we'll use four sessions
     2. cd handler && make test && ./fifo_reader_handler
     3. curl http://localhost:6767/fifo_reader_handler
     4. cd handler && cat Makefile > handler_pipe
-    
+
 You will see the Makefile in the curl session.
 
 ### Contact ###
