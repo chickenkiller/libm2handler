@@ -5,12 +5,14 @@ A C library for handling requests from Mongrel2. Includes a suite of sample hand
 ### Prequisites ###
 
 #### mongrel2 ####
-http://www.mongrel2.org/
-Installed and configured to your liking. If you are trying out the sample handlers use ./config.sh in the deployment folder.
+
+  http://www.mongrel2.org/
 
 #### libjansson ####
-http://www.digip.org/jansson/
-https://github.com/akheron/jansson
+
+  http://www.digip.org/jansson/
+
+  https://github.com/akheron/jansson
 
 #### automake ####
 The gnu automake build system.
@@ -20,6 +22,7 @@ The gnu automake build system.
 You will need to translate the configure.ac to configure.
 
   libtoolize -c || glibtoolize -c
+
   autoreconf -fv --install
 
 ### Building ###
@@ -48,15 +51,22 @@ END QUOTE
 From inside of lib run 'make test' to build all the handlers.
 
 Test the WebSocket support
-(1) cd deployment && ./config.sh && ./start.sh
-(2) cd handler && make test && ./ws_handshake_handler
-(2) Open http://localhost:6767/ in Chrome (testing on 9.whatever and 10.whatever), browse to sample.
+
+ 1. cd deployment && ./config.sh && ./start.sh
+
+ 2. cd handler && make test && ./ws_handshake_handler
+
+ 3. Use Chrome 14+ or Firefox 6+, go to http://localhost:6767/ws.html
 
 Testing body_toupper_handler
 I use three terminal sessions:
-(1) cd deployment && ./config.sh && ./start.sh # Mongrel2 is up
-(2) cd handler && make test && ./body_toupper_handler
-(3) curl localhost:6767/body_to_upper_handler -d "hello handler" -v
+
+ 1. cd deployment && ./config.sh && ./start.sh # Mongrel2 is up
+
+ 2. cd handler && make test && ./body_toupper_handler
+
+ 3. curl localhost:6767/body_to_upper_handler -d "hello handler" -v
+
 # The curl session should spit back the data but capitalized.
 
 Testing fifo_reader_handler
@@ -71,4 +81,4 @@ You will see the Makefile in the curl session.
 Feel free to send me through github. Patches are welcome (and how!)! I'm also on mongrel2@librelist.com.
 
 Author: Xavier Lange
-License: My code is MIT. My websocket code uses the md5 function from PolarSSL -- that one is GPL.
+License: My code is MIT. My websocket code uses the sha1 function from PolarSSL -- that one is GPL.
