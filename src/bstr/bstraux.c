@@ -959,12 +959,16 @@ bstring b, t;
 
 			/* Double size, but deal with unusual case of numeric
 			   overflows */
-
+			   /*
+                        // TODO: Reenable in the future? AND/OR fix?
 			if ((m = b->mlen << 1)   <= b->mlen &&
 			    (m = b->mlen + 1024) <= b->mlen &&
 			    (m = b->mlen + 16)   <= b->mlen &&
 			    (m = b->mlen + 1)    <= b->mlen) t = NULL;
-			else t = bfromcstralloc (m, "");
+			else 
+				*/
+			m = b->mlen;
+			t = bfromcstralloc (m, "");
 
 			if (t) memcpy (t->data, b->data, i);
 			bSecureDestroy (b); /* Cleanse previous buffer */
