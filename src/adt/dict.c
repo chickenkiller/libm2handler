@@ -129,14 +129,14 @@ static void rotate_right(dnode_t *upper)
  * node and free everything under it.  Used by dict_free().
  */
 
-static void free_nodes(dict_t *dict, dnode_t *node, dnode_t *nil)
-{
-    if (node == nil)
-        return;
-    free_nodes(dict, node->left, nil);
-    free_nodes(dict, node->right, nil);
-    dict->freenode(node, dict->context);
-}
+// static void free_nodes(dict_t *dict, dnode_t *node, dnode_t *nil)
+// {
+//     if (node == nil)
+//         return;
+//     free_nodes(dict, node->left, nil);
+//     free_nodes(dict, node->right, nil);
+//     dict->freenode(node, dict->context);
+// }
 
 /*
  * This procedure performs a verification that the given subtree is a binary
