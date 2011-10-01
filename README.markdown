@@ -63,7 +63,7 @@ I use three terminal sessions:
 Testing fifo_reader_handler
 Now we'll use four sessions
     
-    cd handler && make test && ./fifo_reader_handler
+    make handlers && ./fifo_reader_handler
     curl http://localhost:6767/fifo_reader_handler
     cd handler && cat Makefile > handler_pipe
 
