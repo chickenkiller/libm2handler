@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+  <meta charset="utf-8" />
+  <title>WS Handshake Test</title>
+
+  <script type="text/javascript" src="js/jquery-1.5.js"></script>
+  <script type="text/javascript" >
+    debug = function(msg){
+      $("ul#debug").append("<li><pre>" + msg + "</pre></li>");
+    }
+    var send_data = function(){
+      ws.send("hi");
+      return false;
+    };
+    $(document).ready(function(){
+      $("#open").click(ws_open);
+      $("#close").click(ws_close);
+      $("#send").click(ws_send);
+      }
+    );
+  </script>
+  <script type="text/javascript">
+    var ws_open = function(){
+      var SOCKET_ADDR = "ws://localhost:6767/ws_handler";
+      var webSocket;
+      if ( $.browser.mozilla ) {
+        ws = new MozWebSocket(SOCKET_ADDR);
+      } else {
+        ws = new WebSocket(SOCKET_ADDR);
+      }
+
+      ws.onopen = function(){
+        $("td#status").html("connected");
+      };
+      ws.onerror = function(){
+        // alert("whaaa")
+      }
+      ws.onmessage = function(data){
+        debug(data.data);
+        // alert("got data" + data);
+      }
+      ws.onclose = function(data){
+        $("td#status").html("disconnected")
+      }
+      return false;
+    };
+  </script>
+  <script type="text/javascript">
+    var ws_close = function(){
+      ws.close();
+    }
+  </script>
+  <script type="text/javascript">
+    var ws_send = function(){
+      ws.send("blah");
+    }
+  </script>
+  </head>
+
+  <body id="index" class="home">
+    <h1>Interactive WebSocket Demo</h1>
+    <table>
+      <tr>
+        <td>Status</td>
+        <td id="status">disconnected</td>
+      </tr>
+    </table>
+
+    <input type="submit" id="open" value="Open Connection" style="display: block"/>
+    <input type="submit" id="close" value="Close Connection" style="display: block"/>
+    <input type="submit" id="send" value="Send Data (disabled)" style="display: block"/>
+
+    <h2>Debugging Messages</h2>
+    <ul id="debug">
+    </ul>
+  </body>
+</html>

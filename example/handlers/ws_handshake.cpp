@@ -51,46 +51,32 @@ int main(int argc, char **args){
     m2_ws_sessions_state sessions;
     mongrel2_ws_sessions_state_init(&sessions);
 
+    mongrel2_ws_sessions_state_unlock(&sessions);
     mongrel2_request *request = NULL;
-    dnode_t* tempnode = NULL;
-    int retval = 0;
-    m2_ws_session_data* counter = NULL;
     while(shutdown != 1){
         poll_response = zmq_poll(&socket_tracker,1,500*1000);
         if(poll_response > 0){
             request = mongrel2_recv(pull_socket);
 
             if(request != NULL && mongrel2_request_for_disconnect(request) != 1){
-                m2_ws_session_id* incoming = (m2_ws_session_id*)calloc(1,sizeof(m2_ws_session_id));
-                incoming->req = request;
-                printf("Looking at incoming->conn_id = %d\n",incoming->req->conn_id);
-                tempnode = dict_lookup(sessions.dict,incoming);
-
-                if(tempnode == NULL){
-                    mongrel2_ws_reply_upgrade(request,pub_socket);
-                    counter = (m2_ws_session_data*)calloc(1,sizeof(m2_ws_session_data));
-                    counter->times_seen = 0;
-                    retval = dict_alloc_insert(sessions.dict,incoming,counter);
-                    assert(retval == 1);
+                if(mongrel2_ws_sessions_state_contains(&sessions,request)){
+                    printf("We had it already\n");
                 } else {
-                    free(incoming);
-                    counter = (m2_ws_session_data*)dnode_get(tempnode);
-                    counter->times_seen += 1;
+                    mongrel2_ws_reply_upgrade(request,pub_socket);
+                    mongrel2_ws_sessions_state_add(&sessions,request);
                 }
 
                 if(blength(request->body) > 0){
                     // mongrel2_ws_frame_debug(blength(request->body),(uint8_t*)bdata(request->body));
-                    if(tempnode && mongrel2_ws_frame_get_fin(blength(request->body),(uint8_t*)bdata(request->body))){
+                    if(mongrel2_ws_frame_get_fin(blength(request->body),(uint8_t*)bdata(request->body))){
                         printf("Hey, it's a close\n");
-                        dict_delete_free(sessions.dict,tempnode);
+                        mongrel2_ws_sessions_state_remove(&sessions,request);
                         mongrel2_disconnect(pub_socket,request);
                     }
                 } else {
-                    mongrel2_ws_reply(pub_socket,request,(const bstring)&HELLO);
+                    // mongrel2_ws_reply(pub_socket,request,(const bstring)&HELLO);
+                    mongrel2_ws_broadcast(pub_socket,&sessions,(const bstring)&HELLO);
                 }
-                
-
-                printf("FYI: we've got %ld entries\n",dict_count(sessions.dict));
             } else {
                 fprintf(stdout,"Connection %d disconnected\n", request->conn_id);
             }

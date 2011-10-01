@@ -47,7 +47,7 @@ int mongrel2_ws_reply(mongrel2_socket *pub_socket, mongrel2_request *req, bstrin
 
     size_t payload_len = 0;
     uint8_t *payload_data = NULL;
-
+    // Simplest code but seems to be unsafe with chrome 14?
     int retval = mongrel2_ws_frame_create(0,req_len,&payload_len,&payload_data);
 
     if(retval != 0){
@@ -57,6 +57,20 @@ int mongrel2_ws_reply(mongrel2_socket *pub_socket, mongrel2_request *req, bstrin
     mongrel2_ws_frame_set_payload(payload_len,payload_data,req_len,req_data);
     mongrel2_ws_frame_set_opcode(payload_len,payload_data,OP_TEXT);
     mongrel2_ws_frame_set_fin(payload_len,payload_data);
+
+    // Instead, let's chunk it to a bunch of small messages
+    // int fullchunks = req_len % WEBSOCKET_SMALL_MAX;
+    // int leftoverbytes = req_len / WEBSOCKET_SMALL_MAX;
+
+    // bstring chunk;
+    // for(int i=0; i<fullchunks; i++){
+    //     uint8_t chunk_payload[WEBSOCKET_SMALL_MAX];
+    //     chunk = bmidstr(data,i*WEBSOCKET_SMALL_MAX,i*WEBSOCKET_SMALL_MAX+WEBSOCKET_SMALL_MAX-1);
+        
+
+    //     fullchunks--;
+    // }
+
 
     #ifndef NDEBUG
     mongrel2_ws_frame_debug(payload_len,payload_data);

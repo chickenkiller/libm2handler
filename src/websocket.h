@@ -13,6 +13,10 @@
 #include "websocket/framing.h"
 #include "websocket/session.h"
 
+#define WEBSOCKET_SMALL_MAX 125
+#define WEBSOCKET_MEDIUM_MAX 65536
+#define WEBSOCKET_LARGE_MAX 184467440737095516
+
 #ifdef __cplusplus
 extern "C" {
 #endif

@@ -126,7 +126,7 @@ void mongrel2_ws_frame_debug(size_t len, uint8_t* header){
             printf("SIZE:    UNKNOWN!");
             break;
     }
-    printf("MSG_SIZE:%lld\n",msg_size);
+    printf("MSG_SIZE:%llu\n",msg_size);
 
     uint8_t *payload = NULL;
     size_t size = 0;
