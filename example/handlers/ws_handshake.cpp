@@ -4,6 +4,7 @@
 #include <stdlib.h>
 #include <assert.h>
 #include <pthread.h>
+#include <signal.h>
 
 #include "handler.h"
 #include "websocket.h"
