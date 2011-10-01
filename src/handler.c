@@ -296,6 +296,7 @@ int mongrel2_send(mongrel2_socket *pub_socket, bstring response){
      * It needs to be called on the bstring itself. So that gets passed
      * in as the hint. Whew.
      */
+    printf("mongrel2_send, blength(response): %d",blength(response));
     zmq_msg_init_data(msg,bdata(response),blength(response),zmq_bstr_free,response);
 
     zmq_send(pub_socket->zmq_socket,msg,0);

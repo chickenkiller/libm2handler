@@ -76,7 +76,8 @@ int mongrel2_ws_reply(mongrel2_socket *pub_socket, mongrel2_request *req, bstrin
     mongrel2_ws_frame_debug(payload_len,payload_data);
     #endif
 
-    bstring outgoing = bfromcstralloc((int)payload_len, (char*)payload_data);
+    bstring outgoing = blk2bstr(payload_data,payload_len);
+    assert(blength(outgoing) == payload_len);
 
     mongrel2_reply(pub_socket,req,outgoing);
     free(payload_data);

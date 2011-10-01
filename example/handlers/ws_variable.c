@@ -61,7 +61,7 @@ static void free_dict(dnode_t *node, void *notused) {
 }
 
 static bstring genrandmsg(){
-    unsigned int len = WEBSOCKET_MEDIUM_MAX + 100;
+    unsigned int len = WEBSOCKET_MEDIUM_MAX - 1000;
     printf("genrandmsg of len %u\n",len);
     int range = 'Z' - 'A';
     bstring randchars = bfromcstr("");
