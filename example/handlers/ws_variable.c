@@ -12,8 +12,8 @@
 
 #include "handler.h"
 #include "websocket.h"
-#include "websocket/framing.h"
-#include "websocket/session.h"
+#include "websocket_framing.h"
+#include "websocket_session.h"
 #include "adt/dict.h"
 
 // Static function definitions
@@ -66,7 +66,7 @@ static bstring genrandmsg(){
     int range = 'Z' - 'A';
     bstring randchars = bfromcstr("");
     for(int i=0; i<len; i++){
-        char randchar = 'A' + arc4random()%range;
+        char randchar = 'A' + rand()%range;
         bcatblk(randchars,&randchar,1);
     }
     bstring retval = bformat("Len: %d Data: %.*s",len,blength(randchars),bdata(randchars));

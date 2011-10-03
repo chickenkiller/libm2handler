@@ -8,8 +8,8 @@
 
 #include "handler.h"
 #include "websocket.h"
-#include "websocket/framing.h"
-#include "websocket/session.h"
+#include "websocket_framing.h"
+#include "websocket_session.h"
 #include "adt/dict.h"
 
 static const struct tagbstring SENDER = bsStatic("82209006-86FF-4982-B5EA-D1E29E55D483");

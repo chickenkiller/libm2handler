@@ -12,8 +12,8 @@
 
 #include "handler.h"
 #include "websocket.h"
-#include "websocket/framing.h"
-#include "websocket/session.h"
+#include "websocket_framing.h"
+#include "websocket_session.h"
 #include "adt/dict.h"
 
 // Static function definitions

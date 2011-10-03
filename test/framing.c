@@ -3,7 +3,7 @@
 #include <handler.h>
 #include <debug.h>
 #include <websocket.h>
-#include <websocket/framing.h>
+#include <websocket_framing.h>
 
 #ifndef NDEBUG
 void test_frame_small_no_mask(size_t *size, uint8_t **frame){

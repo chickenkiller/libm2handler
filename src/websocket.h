@@ -10,8 +10,8 @@
 
 #include "stdint.h"
 #include "adt/dict.h"
-#include "websocket/framing.h"
-#include "websocket/session.h"
+#include "websocket_framing.h"
+#include "websocket_session.h"
 
 #define WEBSOCKET_SMALL_MAX 125
 #define WEBSOCKET_MEDIUM_MAX 65536

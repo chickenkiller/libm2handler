@@ -8,7 +8,7 @@
 #include <assert.h>
 
 #include "adt/dict.h"
-#include "websocket/session.h"
+#include "websocket_session.h"
 
 static int compare_session_id(const void *ses1_void, const void *ses2_void){
     m2_ws_session_id *ses1 = (m2_ws_session_id*)ses1_void;

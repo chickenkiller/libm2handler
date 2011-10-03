@@ -8,8 +8,8 @@
 #include <string.h>
 #include <assert.h>
 
-#include "framing.h"
-#include "../debug.h"
+#include "websocket_framing.h"
+#include "debug.h"
 
 /**
  *   CONTROL FLAG FUNCTIONALITY

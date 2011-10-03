@@ -15,14 +15,14 @@ libm2handler_la_LIBADD          = libbstr.la libdict.la libsha1.la
 libm2handler_la_includedir      = $(includedir)/m2handler
 libm2handler_la_include_HEADERS = src/handler.h \
                                   src/websocket.h \
-                                  src/websocket/framing.h \
-                                  src/websocket/session.h \
+                                  src/websocket_framing.h \
+                                  src/websocket_session.h \
                                   src/debug.h
 
 libm2handler_la_SOURCES = src/handler.c \
                           src/websocket.c \
-                          src/websocket/framing.c \
-                          src/websocket/session.c \
+                          src/websocket_framing.c \
+                          src/websocket_session.c \
                           src/debug.c
 
 libsha1_la_includedir      = $(includedir)/m2handler/sha1
