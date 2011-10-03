@@ -18,7 +18,6 @@ libm2handler_la_include_HEADERS = src/handler.h \
                                   src/websocket_framing.h \
                                   src/websocket_session.h \
                                   src/debug.h
-
 libm2handler_la_SOURCES = src/handler.c \
                           src/websocket.c \
                           src/websocket_framing.c \
@@ -36,7 +35,7 @@ libbstr_la_include_HEADERS = src/bstr/bstrlib.h \
 libbstr_la_SOURCES         = src/bstr/bstrlib.c \
                              src/bstr/bstraux.c
 
-libdict_la_includedir      = $(includedir)/src/adt
+libdict_la_includedir      = $(includedir)/m2handler/adt
 libdict_la_include_HEADERS = src/adt/dict.h
 libdict_la_SOURCES         = src/adt/dict.c
 
