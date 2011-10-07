@@ -84,11 +84,10 @@ static int mongrel2_ws_frame_set_payload_size(size_t len, uint8_t *frame, uint64
 		frame[1] |= (126 & 0x7F);
       uint16_t *dest = (uint16_t*)(&(frame[2]));
       *dest = htons( (uint16_t)size );
-		//memcpy(&(frame[2]),sizeptr,2);
-	// TODO: Upper bounds check. && size <= 18446744073709551616LL doesn't work!
-	// TODO: Add msg size assertions
-	} else if (size >= 65537)
-   // TODO: convert host to network byte order for this case
+	  // TODO: Upper bounds check. && size <= 18446744073709551616LL doesn't work!
+	  // TODO: Add msg size assertions
+	} else if (size >= 65537) {
+      // TODO: convert host to network byte order for this case
 		frame[1] |= (127 & 0x7F);
 		memcpy(&(frame[2]),sizeptr,8);
 	} else {
