@@ -289,6 +289,12 @@ mongrel2_request *mongrel2_recv(mongrel2_socket *pull_socket){
  * @param response_buff
  */
 int mongrel2_send(mongrel2_socket *pub_socket, bstring response){
+    #ifndef NDEBUG
+    fprintf(stdout,"=======MONGREL2_SEND==========\n");
+    fprintf(stdout,"''%.*s''\n",blength(response),bdata(response));
+    fprintf(stdout,"==============================\n");
+    #endif
+
     zmq_msg_t *msg = calloc(1,sizeof(zmq_msg_t));
 
     /**
@@ -303,11 +309,6 @@ int mongrel2_send(mongrel2_socket *pub_socket, bstring response){
     zmq_msg_close(msg);
     free(msg);
 
-    #ifndef NDEBUG
-    fprintf(stdout,"=======MONGREL2_SEND==========\n");
-    fprintf(stdout,"''%.*s''\n",blength(response),bdata(response));
-    fprintf(stdout,"==============================\n");
-    #endif
     return 0;
 }
 /**
