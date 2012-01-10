@@ -47,7 +47,7 @@ mongrel2_ctx* mongrel2_init(int threads);
 int mongrel2_deinit(mongrel2_ctx *ctx);
 
 int mongrel2_connect(mongrel2_socket* socket, const char* dest);
-mongrel2_socket* mongrel2_pull_socket(mongrel2_ctx *ctx, char* identity);
+mongrel2_socket* mongrel2_pull_socket(mongrel2_ctx *ctx, const char* identity);
 mongrel2_socket* mongrel2_pub_socket(mongrel2_ctx *ctx);
 int mongrel2_close(mongrel2_socket *socket);
 

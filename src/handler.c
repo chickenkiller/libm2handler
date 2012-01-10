@@ -18,8 +18,6 @@
 #include "bstr/bstraux.h"
 #include <strings.h>
 
-#define DEBUG
-
 static const struct tagbstring SPACE = bsStatic(" ");
 static const struct tagbstring COLON = bsStatic(":");
 static const struct tagbstring COMMA = bsStatic(",");
@@ -94,7 +92,7 @@ static void mongrel2_set_identity(mongrel2_ctx *ctx, mongrel2_socket *socket, co
       exit(EXIT_FAILURE);
     }
 }
-mongrel2_socket* mongrel2_pull_socket(mongrel2_ctx *ctx, char* identity){
+mongrel2_socket* mongrel2_pull_socket(mongrel2_ctx *ctx, const char* identity){
     mongrel2_socket *socket;
     socket = mongrel2_alloc_socket(ctx,ZMQ_PULL);
 
@@ -370,19 +368,15 @@ int mongrel2_request_for_disconnect(mongrel2_request *req){
 
     method_str = json_string_value(method_obj);
     bstring method_bstr = bfromcstr(method_str);
-    json_decref(method_obj);
-    json_decref(json_body);
     
     if(method_obj == NULL || bstrcmp(method_bstr,&DISCONNECT) != 0){
         bdestroy(method_bstr);
-        json_decref(method_obj);
         json_decref(json_body);
         bdestroy(header);
         return 0;
     }
     bdestroy(method_bstr);
 
-    json_decref(method_obj);
     json_decref(json_body);
     bdestroy(header);
     return 1;
@@ -423,9 +417,7 @@ bstring mongrel2_request_get_header(const mongrel2_request *req, const char* key
       fprintf(stderr,"Ruh roh, could not get key\n");
     }
     const char* val_str = json_string_value(header_val_obj);
-    bstring retval = bfromcstr((char*)val_str);
-    json_decref(header_val_obj);
-
+    bstring retval = bfromcstr(val_str);
     return retval;
 }
 
