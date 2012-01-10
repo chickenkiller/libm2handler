@@ -13,21 +13,16 @@ A C library for handling requests from Mongrel2. Includes a suite of sample hand
     http://www.digip.org/jansson/
     https://github.com/akheron/jansson
 
-#### GNU Automake ####
-The GNU automake build system.
+#### Python ####
+
+Python 2.3 to 3.x is needed to execute the waf build system.
+The 'waf' script is already included with the sources.
 
 ### Building from Scratch ###
 
-You need to first translate the configure.ac to configure.
-
-    libtoolize -c || glibtoolize -c
-    autoreconf -fv --install
-
-Great, now you have your build system. Now to build the Makefile.
-
-    ./configure
-    make
-    sudo make install
+    ./waf configure
+    ./waf build
+    sudo ./waf install
 
 ### Valgrind ###
 
