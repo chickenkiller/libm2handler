@@ -60,3 +60,4 @@ void mongrel2_bstring_debug(bstring data);
 
 #endif
 #endif	/* M2DEBUG_H */
+

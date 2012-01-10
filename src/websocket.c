@@ -171,3 +171,4 @@ static int mongrel2_ws_08_calculate_accept(mongrel2_request *req, bstring *ptr){
     *ptr = accept_encoded;
     return 0;
 }
+

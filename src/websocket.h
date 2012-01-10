@@ -36,3 +36,4 @@ int mongrel2_ws_calculate_accept(mongrel2_request *req,bstring *accept);
 #endif
 
 #endif	/* M2WEBSOCKET_H */
+

@@ -45,3 +45,4 @@ void mongrel2_ws_sessions_state_unlock(m2_ws_sessions_state *container);
 
 // M2WEBSOCKETSESSION_H
 #endif
+

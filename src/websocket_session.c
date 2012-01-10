@@ -102,3 +102,4 @@ void mongrel2_ws_sessions_state_unlock(m2_ws_sessions_state *container){
     int retval = pthread_mutex_unlock(&(container->dict_mutex));
     assert(retval == 0);
 }
+
