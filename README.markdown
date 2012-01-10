@@ -52,8 +52,7 @@ I use three terminal sessions:
     cd deployment && ./config.sh && ./start.sh # Mongrel2 is up
     cd handler && make test && ./body_toupper_handler
     curl localhost:6767/body_to_upper_handler -d "hello handler" -v
-
-# The curl session should spit back the data but capitalized.
+    # The curl session should spit back the data but capitalized.
 
 Testing fifo_reader_handler
 Now we'll use four sessions
