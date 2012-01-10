@@ -51,9 +51,14 @@ def build(bld):
 			use    = 'm2handler_sh'
 			)
 	for test in 'ws_accept framing dict jansson'.split():
+		uses = ''
+		if test == 'jansson':
+			uses = 'JANSSON'
+		else:
+			uses = 'm2handler_sh'
 		bld.program(
 				target = 'test/%s' % test,
 				source = 'test/%s.c' % test,
-				use    = 'm2handler_sh'
+				use    = uses
 				)
 
