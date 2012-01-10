@@ -12,7 +12,9 @@
  */
 
 #include "handler.h"
-#include <config.h>
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
   #if defined __APPLE__ && defined __MACH__
   #define daemon deprecated
   #endif
