@@ -10,6 +10,7 @@ def options(opt):
 
 def configure(conf):
 	conf.load('compiler_c compiler_cxx')
+	conf.env.version = VERSION
 	conf.check_cfg(package='libzmq', args='--cflags --libs', uselib_store='ZMQ')
 	conf.check_cfg(package='jansson', args='--cflags --libs', uselib_store='JANSSON')
 	if conf.options.crossprefix:
@@ -25,6 +26,7 @@ def configure(conf):
 	conf.env.append_unique('LIB_ZMQ','stdc++ pthread uuid rt m'.split())
 
 def build(bld):
+	bld( source='m2handler.pc.in', target='m2handler.pc')
 	bld.stlib( target='sha1', source='src/sha1/sha1.c',	includes='src/sha1')
 	bld.stlib( target='bstr', source='src/bstr/bstrlib.c src/bstr/bstraux.c', includes='src/bstr')
 	bld.stlib( target='dict', source='src/adt/dict.c', includes='src/adt')
@@ -37,18 +39,27 @@ def build(bld):
 				vnum     = VERSION,
 				includes = 'src',
 				export_includes = 'src',
-				use      = 'bstr dict sha1 ZMQ JANSSON'
+				use      = 'bstr dict sha1 ZMQ JANSSON',
+				install_path = '${PREFIX}/lib'
 				)
+	srcdir = bld.path.find_dir('src')
+	bld.install_files('${PREFIX}/include/m2handler',
+			srcdir.ant_glob('**/*.h'),
+			cwd = srcdir,
+			relative_trick = True
+			)
 	for handler in 'body_toupper daemon_to_upper fifo_reader ws_handshake ws_variable'.split():
 		bld.program(
 				target = handler,
 				source = 'example/handlers/%s.c' % handler,
-				use    = 'm2handler_sh'
+				use    = 'm2handler_sh',
+				install_path = None
 				)
 	bld.program(
 			target = 'ws_cpp_handshake',
 			source = 'example/handlers/ws_handshake.cpp',
-			use    = 'm2handler_sh'
+			use    = 'm2handler_sh',
+			install_path = None
 			)
 	for test in 'ws_accept framing dict jansson'.split():
 		uses = ''
@@ -59,6 +70,7 @@ def build(bld):
 		bld.program(
 				target = 'test/%s' % test,
 				source = 'test/%s.c' % test,
-				use    = uses
+				use    = uses,
+				install_path = None
 				)
 

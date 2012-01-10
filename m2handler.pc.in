@@ -1,0 +1,11 @@
+prefix=@prefix@
+exec_prefix=${prefix}
+libdir=${exec_prefix}/lib
+includedir=${prefix}/include
+
+Name: m2handler
+Description: Mongrel2 Handler Library for C
+Version: @version@
+Requires: libzmq, jansson
+Libs: -L${libdir} -lm2handler
+Cflags: -I${includedir}
