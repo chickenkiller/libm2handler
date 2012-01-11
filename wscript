@@ -27,6 +27,12 @@ def configure(conf):
 
 def build(bld):
 	bld( source='m2handler.pc.in', target='m2handler.pc')
+	srcdir = bld.path.find_dir('src')
+	bld.install_files('${PREFIX}/include/m2handler',
+			srcdir.ant_glob('**/*.h',excl=['sha1/config.h']),
+			cwd = srcdir,
+			relative_trick = True
+			)
 	bld.stlib( target='sha1', source='src/sha1/sha1.c',	includes='src/sha1')
 	bld.stlib( target='bstr', source='src/bstr/bstrlib.c src/bstr/bstraux.c', includes='src/bstr')
 	bld.stlib( target='dict', source='src/adt/dict.c', includes='src/adt')
@@ -42,12 +48,6 @@ def build(bld):
 				use      = 'bstr dict sha1 ZMQ JANSSON',
 				install_path = '${PREFIX}/lib'
 				)
-	srcdir = bld.path.find_dir('src')
-	bld.install_files('${PREFIX}/include/m2handler',
-			srcdir.ant_glob('**/*.h'),
-			cwd = srcdir,
-			relative_trick = True
-			)
 	for handler in 'body_toupper daemon_to_upper fifo_reader ws_handshake ws_variable'.split():
 		bld.program(
 				target = handler,
