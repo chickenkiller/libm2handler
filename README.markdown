@@ -35,11 +35,16 @@ This software was developed with valgrind in hand.
 
     valgrind --leak-check=full --gen-suppressions=yes ./mongrel_handler
 
-It throws a real shit fit about "Syscall param socketcall.sendto(msg) points to uninitialised byte(s)" and I have no idea how to work around it. It sounds harmless.
+It throws a real shit fit about "Syscall param socketcall.sendto(msg) points to uninitialised byte(s)"
+and I have no idea how to work around it. It sounds harmless.
 
     http://markmail.org/message/oqebrtdanawsiz62
 
-    This (common) problem is caused by writing to a socket (or a file) bytes derived from a structure which has alignment padding, which is uninitialised. That is harmless, but the problem is I don't know of a general way to suppress these errors which doesn't also potentially hide real bugs when you mistakenly write uninitialised data to a file/ socket. The best I can suggest is to do a case-by-case suppression yourself (--gen-suppressions=yes is your friend).
+    This (common) problem is caused by writing to a socket (or a file) bytes derived from a structure
+    which has alignment padding, which is uninitialised. That is harmless, but the problem is I don't
+    know of a general way to suppress these errors which doesn't also potentially hide real bugs when
+    you mistakenly write uninitialised data to a file/ socket. The best I can suggest is to do a
+    case-by-case suppression yourself (--gen-suppressions=yes is your friend).
 
 ### Sample Handlers ###
 
