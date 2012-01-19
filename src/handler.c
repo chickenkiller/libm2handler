@@ -324,7 +324,6 @@ int mongrel2_reply_http(mongrel2_socket *pub_socket, mongrel2_request *req, cons
     bconcat(payload, &SEPERATOR);
     bconcat(payload,body);
     int retval = mongrel2_reply(pub_socket, req, payload);
-    bdestroy(payload);
     return retval;
 }
 /**
