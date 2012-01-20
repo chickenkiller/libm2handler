@@ -96,16 +96,18 @@ static int mongrel2_ws_frame_set_payload_size(size_t len, uint8_t *frame, uint64
 	return 0;
 }
 
+// TODO: Unsafe, need to do proper endian conversion. Will need
+// custom macro for LARGE
 uint64_t mongrel2_ws_frame_get_payload_size(size_t len, uint8_t *frame){
 	ftype type = mongrel2_ws_frame_get_payload_type(len,frame);
 
 	uint64_t retval = 0x0000000000000000;
 	switch(type){
 		case SMALL:
-			retval |= (frame[1] & 0x7F);
+			retval = (frame[1] & 0x7F);
 			break;
 		case MEDIUM:
-			memcpy(&retval,&(frame[2]),2);
+		  retval = htons( *((uint16_t*)&frame[2]) );
 			break;
 		case LARGE:
 			memcpy(&retval,&(frame[2]),8);
@@ -264,9 +266,9 @@ static uint64_t mongrel2_ws_frame_get_size_necessary(int mask_present,uint64_t p
 	if(payload_size < 126){
 		retval = retval;
 	} else if (payload_size >= 126 && payload_size <= 65536){
-		retval = retval + 8;
+		retval = retval + 2;
 	} else {
-		retval = retval + 16;
+		retval = retval + 8;
 	}
 
 	retval = retval + payload_size;
