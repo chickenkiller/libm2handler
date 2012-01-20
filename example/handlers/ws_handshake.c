@@ -18,7 +18,8 @@
 
 // Static function definitions
 static const struct tagbstring SENDER = bsStatic("82209006-86FF-4982-B5EA-D1E29E55D483");
-static const struct tagbstring HELLO = bsStatic("Hi there");
+// static const struct tagbstring HELLO = bsStatic("Hi there");
+static const struct tagbstring HELLO = bsStatic("{\"msg\": \"hi there\"}");
 
 // Shared variables
 static mongrel2_socket *pub_socket;
@@ -118,20 +119,21 @@ int main(int argc, char **args){
                 }
 
                 if(blength(request->body) > 0){
-                    if(tempnode && mongrel2_ws_frame_get_fin(blength(request->body),
-                                                             (uint8_t*)bdata(request->body))){
-                        printf("Hey, it's a close\n");
+                    // mongrel2_ws_frame_get_fin(blength(request->body),
+                    //                                         (uint8_t*)bdata(request->body))
+                    if(tempnode && OP_CLOSE == mongrel2_ws_frame_get_opcode(blength(request->body),
+                                                                (uint8_t*)bdata(request->body))){
                         dict_delete_free(dict,tempnode);
                         mongrel2_disconnect(pub_socket,request);
                     }
                 } else {
                     mongrel2_ws_reply(pub_socket,request,(const bstring)&HELLO);
                 }
-                
-
                 printf("FYI: we've got %ld entries\n",dict_count(dict));
             } else {
                 fprintf(stdout,"Connection %d disconnected\n", request->conn_id);
+                dict_delete_free(dict,tempnode);
+                mongrel2_disconnect(pub_socket,request);
             }
         } else if (poll_response < 0){
             fprintf(stdout, "Error on poll!");

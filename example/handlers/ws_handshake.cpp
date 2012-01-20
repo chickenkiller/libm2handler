@@ -10,10 +10,13 @@
 #include "websocket.h"
 #include "websocket_framing.h"
 #include "websocket_session.h"
+#include "debug.h"
 #include "adt/dict.h"
 
 static const struct tagbstring SENDER = bsStatic("82209006-86FF-4982-B5EA-D1E29E55D483");
-static const struct tagbstring HELLO  = bsStatic("HI THERE");
+// static const struct tagbstring HELLO  = bsStatic("HI THERE");
+// static const struct tagbstring HELLO = bsStatic("{\"msg\": \"hi there\"}");
+static const struct tagbstring HELLO = bsStatic("{\"message\": \"{\\\"guid\\\": \\\"63636330350000000000000000000000\\\"}\", \"metadata\": \"{\\\"participant\\\": \\\"ccc05-03\\\", \\\"timestamp_second\\\": \\\"1326922280\\\", \\\"timestamp_nanosec\\\": \\\"553700663\\\", \\\"instance_handle\\\": 12287918211081, \\\"topic\\\": \\\"HeartBeat_Pulse\\\"}\"}");
 
 static int shutdown = 0;
 static void call_for_stop(int sig_id){
@@ -69,10 +72,13 @@ int main(int argc, char **args){
 
                 if(blength(request->body) > 0){
                     // mongrel2_ws_frame_debug(blength(request->body),(uint8_t*)bdata(request->body));
-                    if(mongrel2_ws_frame_get_fin(blength(request->body),(uint8_t*)bdata(request->body))){
+                    if(OP_CLOSE == mongrel2_ws_frame_get_opcode(blength(request->body),
+                                                                (uint8_t*)bdata(request->body))){
                         printf("Hey, it's a close\n");
-                        mongrel2_ws_sessions_state_remove(&sessions,request);
-                        mongrel2_disconnect(pub_socket,request);
+                    } else {
+                        printf("Not a OP_CLOSE. bstring length: '%d'\n",blength(request->body));
+                        mongrel2_ws_frame_debug(blength(request->body),
+                                                                (uint8_t*)bdata(request->body));
                     }
                 } else {
                     // mongrel2_ws_reply(pub_socket,request,(const bstring)&HELLO);
@@ -80,6 +86,8 @@ int main(int argc, char **args){
                 }
             } else {
                 fprintf(stdout,"Connection %d disconnected\n", request->conn_id);
+                mongrel2_ws_sessions_state_remove(&sessions,request);
+                mongrel2_disconnect(pub_socket,request);
             }
 
         } else if(poll_response < 0) {

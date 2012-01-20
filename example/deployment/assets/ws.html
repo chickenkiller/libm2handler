@@ -53,7 +53,7 @@
   </script>
   <script type="text/javascript">
     var ws_send = function(){
-      ws.send("blah");
+      ws.send($("input#payload").text);
     }
   </script>
   </head>
@@ -69,6 +69,7 @@
 
     <input type="submit" id="open" value="Open Connection" style="display: block"/>
     <input type="submit" id="close" value="Close Connection" style="display: block"/>
+    <input type="text"   id="payload" value="(Fill me in)" style="display:block"/>
     <input type="submit" id="send" value="Send Data (disabled)" style="display: block"/>
 
     <h2>Debugging Messages</h2>
