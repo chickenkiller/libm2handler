@@ -1,4 +1,3 @@
-
 # wscript made for Waf v1.6 or greater.
 
 APPNAME = 'libm2handler'
@@ -11,14 +10,14 @@ def options(opt):
 def configure(conf):
 	conf.load('compiler_c compiler_cxx')
 	conf.env.version = VERSION
-	conf.check_cfg(package='libzmq', args='--cflags --libs', uselib_store='ZMQ')
+	conf.check_cfg(package='libzmq' , args='--cflags --libs', uselib_store='ZMQ'    )
 	conf.check_cfg(package='jansson', args='--cflags --libs', uselib_store='JANSSON')
 	if conf.options.crossprefix:
-		conf.env.INCLUDES_ZMQ = [ conf.options.crossprefix+i for i in conf.env.INCLUDES_ZMQ ]
-		conf.env.LIBPATH_ZMQ = [ conf.options.crossprefix+i for i in conf.env.LIBPATH_ZMQ ]
-		conf.env.STLIBPATH_ZMQ = [ conf.options.crossprefix+i for i in conf.env.STLIBPATH_ZMQ ]
-		conf.env.INCLUDES_JANSSON = [ conf.options.crossprefix+i for i in conf.env.INCLUDES_JANSSON ]
-		conf.env.LIBPATH_JANSSON = [ conf.options.crossprefix+i for i in conf.env.LIBPATH_JANSSON ]
+		conf.env.INCLUDES_ZMQ      = [ conf.options.crossprefix+i for i in conf.env.INCLUDES_ZMQ      ]
+		conf.env.LIBPATH_ZMQ       = [ conf.options.crossprefix+i for i in conf.env.LIBPATH_ZMQ       ]
+		conf.env.STLIBPATH_ZMQ     = [ conf.options.crossprefix+i for i in conf.env.STLIBPATH_ZMQ     ]
+		conf.env.INCLUDES_JANSSON  = [ conf.options.crossprefix+i for i in conf.env.INCLUDES_JANSSON  ]
+		conf.env.LIBPATH_JANSSON   = [ conf.options.crossprefix+i for i in conf.env.LIBPATH_JANSSON   ]
 		conf.env.STLIBPATH_JANSSON = [ conf.options.crossprefix+i for i in conf.env.STLIBPATH_JANSSON ]
 	flags='-g -Wall -Werror'.split()
 	conf.env.append_unique('CFLAGS', flags + ['-std=gnu99'])
@@ -33,9 +32,9 @@ def build(bld):
 			cwd = srcdir,
 			relative_trick = True
 			)
-	bld.stlib( target='sha1', source='src/sha1/sha1.c',	includes='src/sha1')
+	bld.stlib( target='sha1', source='src/sha1/sha1.c',                       includes='src/sha1')
 	bld.stlib( target='bstr', source='src/bstr/bstrlib.c src/bstr/bstraux.c', includes='src/bstr')
-	bld.stlib( target='dict', source='src/adt/dict.c', includes='src/adt')
+	bld.stlib( target='dict', source='src/adt/dict.c',                        includes='src/adt' )
 	for type in 'st sh'.split():
 		bld(
 				features = 'c c%slib' % type,
