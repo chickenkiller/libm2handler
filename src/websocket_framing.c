@@ -180,7 +180,7 @@ static int mongrel2_ws_frame_get_mask_start(size_t size, uint8_t *frame){
 	}
 
 	int mask_start = 2;
-	fflag size_class = mongrel2_ws_frame_get_payload_type(size,frame);
+	ftype size_class = mongrel2_ws_frame_get_payload_type(size,frame);
 	if(size_class == SMALL){
 		// nothing
 	} else if (size_class == MEDIUM){
@@ -264,7 +264,7 @@ static uint64_t mongrel2_ws_frame_get_size_necessary(int mask_present,uint64_t p
 	}
 
 	if(payload_size < 126){
-		retval = retval;
+		; //noop
 	} else if (payload_size >= 126 && payload_size <= 65536){
 		retval = retval + 2;
 	} else {

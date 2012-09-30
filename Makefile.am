@@ -4,10 +4,14 @@ noinst_bindir = `pwd`/example/bin
 noinst_bin_PROGRAMS = $(sample_handlers) \
 					  $(test_programs)
 
-AM_CFLAGS=-g -std=gnu99 -Wall -Werror -Isrc/ -I/opt/local/include
-AM_CXXFLAGS=-g -Wall -Werror -Isrc/ -I/opt/local/include
+ACLOCAL_AMFLAGS=-I m4
+#AM_CFLAGS=-g -O2 -std=gnu99 -Werror -Isrc/ -I/opt/local/include
+AM_CFLAGS=-g -O2 -std=gnu99 -Werror -Isrc/ -I/opt/local/include -DNDEBUG
 
-sample_handlers=body_toupper daemon_to_upper fifo_reader ws_handshake ws_cpp_handshake ws_variable
+#AM_CXXFLAGS=-g -Werror  -Isrc/ -I/opt/local/include
+AM_CXXFLAGS=-g -Werror  -Isrc/ -I/opt/local/include -DNDEBUG
+
+sample_handlers=body_toupper null_handler daemon_to_upper fifo_reader ws_handshake ws_cpp_handshake ws_variable
 test_programs=ws_accept framing dict jansson
 
 libm2handler_la_LDFLAGS         = -lzmq -ljansson
@@ -44,6 +48,11 @@ body_toupper_CPPFLAGS     = -Isrc/
 body_toupper_DEPENDENCIES = libm2handler.la
 body_toupper_LDADD        = -lm2handler
 body_toupper_SOURCES      = $(handlerdir)/body_toupper.c
+
+null_handler_CPPFLAGS     = -Isrc/
+null_handler_DEPENDENCIES = libm2handler.la
+null_handler_LDADD        = -lm2handler
+null_handler_SOURCES      = $(handlerdir)/null_handler.c
 
 daemon_to_upper_CPPFLAGS  = -Isrc/
 daemon_to_upper_DEPENDENCIES = libm2handler.la

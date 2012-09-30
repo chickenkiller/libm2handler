@@ -14,7 +14,7 @@ AC_PROG_CXX
 # TODO, check for zmq
 # TODO, check for jansson
 
-export CFLAGS="${CFLAGS} -L/opt/local/lib -L/usr/local/lib"
-export CFLAGS="${CFLAGS} -I/opt/local/include"
+export CFLAGS="${CFLAGS}"
+export CFLAGS="${CFLAGS}"
 
 AC_OUTPUT(Makefile)

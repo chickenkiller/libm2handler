@@ -40,10 +40,11 @@ int main(int argc, char **args){
     bstring pub_addr  = bfromcstr(args[2]);
 
     mongrel2_ctx *ctx = mongrel2_init(1);
-    mongrel2_socket *pull_socket = mongrel2_pull_socket(ctx,bdata(&SENDER));
+    mongrel2_socket *pull_socket = mongrel2_pull_socket(ctx);
     mongrel2_connect(pull_socket, bdata(pull_addr));
     mongrel2_socket *pub_socket = mongrel2_pub_socket(ctx);
     mongrel2_connect(pub_socket, bdata(pub_addr));
+mongrel2_set_identity(pub_socket, bdata(&SENDER) );
     
     // Polling is done to show how to do a clean shutdown
     int poll_response;
@@ -77,8 +78,9 @@ int main(int argc, char **args){
                         printf("Hey, it's a close\n");
                     } else {
                         printf("Not a OP_CLOSE. bstring length: '%d'\n",blength(request->body));
-                        mongrel2_ws_frame_debug(blength(request->body),
-                                                                (uint8_t*)bdata(request->body));
+#ifndef NDEBUG
+                        mongrel2_ws_frame_debug(blength(request->body), (uint8_t*)bdata(request->body));
+#endif
                     }
                 } else {
                     // mongrel2_ws_reply(pub_socket,request,(const bstring)&HELLO);

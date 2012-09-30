@@ -50,29 +50,38 @@ and I have no idea how to work around it. It sounds harmless.
 
 From inside of lib run 'make test' to build all the handlers.
 
-Test the WebSocket support
+#### Testing null_handler
+I use three terminal sessions:
 
-    cd deployment && ./config.sh && ./start.sh
-    make handlers && ./ws_handshake_handler tcp://127.0.0.1:7999 tcp://127.0.0.1:7998
-    # Use Chrome 14+ or Firefox 6+, go to http://localhost:6767/ws.html
+    cd deployment && ./config.sh && ./start.sh # Mongrel2 is up
+    cd handler && make test && ./null_handler
+    curl localhost:6767/dev/zero -v
 
-Testing body_toupper_handler
+**The curl session should return a 204 No Content success code with no content whatsoever**
+
+#### Testing body_toupper_handler
 I use three terminal sessions:
 
     cd deployment && ./config.sh && ./start.sh # Mongrel2 is up
     cd handler && make test && ./body_toupper_handler
     curl localhost:6767/body_to_upper_handler -d "hello handler" -v
 
-# The curl session should spit back the data but capitalized.
+**The curl session should spit back the data but capitalized.**
 
-Testing fifo_reader_handler
+#### Testing fifo_reader_handler
 Now we'll use four sessions
-    
+
     make handlers && ./fifo_reader_handler
     curl http://localhost:6767/fifo_reader_handler
     cd handler && cat Makefile > handler_pipe
 
 You will see the Makefile in the curl session.
+
+####Test the WebSocket support
+
+    cd deployment && ./config.sh && ./start.sh
+    make handlers && ./ws_handshake_handler tcp://127.0.0.1:7999 tcp://127.0.0.1:7998
+    # Use Chrome 14+ or Firefox 6+, go to http://localhost:6767/ws.html
 
 ### Contact ###
 Feel free to send me through github. Patches are welcome (and how!)! I'm also on mongrel2@librelist.com.

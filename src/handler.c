@@ -18,6 +18,9 @@
 #include "bstr/bstraux.h"
 #include <strings.h>
 
+#include <stddef.h>
+#include <stdint.h>
+
 static const struct tagbstring SPACE = bsStatic(" ");
 static const struct tagbstring COLON = bsStatic(":");
 static const struct tagbstring COMMA = bsStatic(",");
@@ -25,6 +28,7 @@ static const struct tagbstring SEPERATOR = bsStatic("\r\n\r\n");
 static const struct tagbstring JSON = bsStatic("JSON");
 static const struct tagbstring DISCONNECT = bsStatic("disconnect");
 static const char *RESPONSE_HEADER = "%*s %d:%d, ";
+static const uint64_t HWM = 100;
 // bstring response = bformat(RESPONSE_HEADER,blength(req->uuid),bdata(req->uuid),blength(req->conn_id_bstr),req->conn_id);÷
 
 static void zmq_bstr_free(void *data, void *bstr){
@@ -68,11 +72,10 @@ static mongrel2_socket* mongrel2_alloc_socket(mongrel2_ctx *ctx, int type){
 /**
  * Identity is only needed for pull sockets (right?) so I'll only
  * mongrel2_pull_socket will call this.
- * @param ctx
  * @param socket
  * @param identity
  */
-static void mongrel2_set_identity(mongrel2_ctx *ctx, mongrel2_socket *socket, const char* identity){
+void mongrel2_set_identity(mongrel2_socket *socket, const char* identity){
     int zmq_retval = zmq_setsockopt(socket->zmq_socket,ZMQ_IDENTITY,identity,strlen(identity));
     if(zmq_retval != 0){
       switch(errno){
@@ -92,11 +95,37 @@ static void mongrel2_set_identity(mongrel2_ctx *ctx, mongrel2_socket *socket, co
       exit(EXIT_FAILURE);
     }
 }
-mongrel2_socket* mongrel2_pull_socket(mongrel2_ctx *ctx, const char* identity){
+/**
+ * Set high-water-mark to avoid flooding the handler when it cannot keep with the requests
+ * mongrel2_pull_socket will call this.
+ * @param socket
+ * @param max_requests
+ */
+static void mongrel2_set_hwm(mongrel2_socket *socket, uint64_t max_requests){
+    int zmq_retval = zmq_setsockopt(socket->zmq_socket,ZMQ_HWM,&max_requests,sizeof (uint64_t));
+    if(zmq_retval != 0){
+      switch(errno){
+          case EINVAL : {
+              fprintf(stderr, "Unknown setsockopt property");
+              break;
+          }
+          case ETERM : {
+              fprintf(stderr, "ZMQ context already terminated");
+              break;
+          }
+          case EFAULT : {
+              fprintf(stderr, "Socket provided was not valid");
+              break;
+          }
+      }
+      exit(EXIT_FAILURE);
+    }
+}
+mongrel2_socket* mongrel2_pull_socket(mongrel2_ctx *ctx){
     mongrel2_socket *socket;
     socket = mongrel2_alloc_socket(ctx,ZMQ_PULL);
 
-    mongrel2_set_identity(ctx,socket,identity);
+    mongrel2_set_hwm(socket, HWM);
 
     return socket;
 }
@@ -300,7 +329,9 @@ int mongrel2_send(mongrel2_socket *pub_socket, bstring response){
      * It needs to be called on the bstring itself. So that gets passed
      * in as the hint. Whew.
      */
-    printf("mongrel2_send, blength(response): %d",blength(response));
+    #ifndef NDEBUG
+    fprintf(stderr, "mongrel2_send, blength(response): %d\n",blength(response));
+    #endif
     zmq_msg_init_data(msg,bdata(response),blength(response),zmq_bstr_free,response);
 
     zmq_send(pub_socket->zmq_socket,msg,0);
