@@ -169,6 +169,28 @@ int mongrel2_connect(mongrel2_socket* socket, const char* dest){
     }
     return 0;
 }
+
+/**
+ * Parse the raw request headers as json
+ * @param req
+ * @return 0 on success, -1 on failure
+ */
+int mongrel2_parse_headers(mongrel2_request* req) {
+  // TODO: error situations here?
+  json_error_t header_err;
+  req->headers = json_loads(bdata(req->raw_headers),0,&header_err);// json_string(bdata(req->raw_headers));
+  if(req->headers == NULL){
+      fprintf(stderr,"Problem parsing the inputs near position: %d, line: %d, col: %d",header_err.position,header_err.line,header_err.position);
+      return -1;
+  }
+  if(json_typeof(req->headers) != JSON_OBJECT){
+    fprintf(stderr, "Headers did not turn into an object... ruh roh!");
+    req->headers = NULL;
+    return -1;
+  }
+  return 0;
+}
+
 /**
  * Honky-dory hand-made parser for mongrel2's request format
  *
@@ -278,16 +300,9 @@ mongrel2_request *mongrel2_parse_request(bstring raw_request_bstr){
   fprintf(stdout,"================================\n");
   #endif
 
-  // TODO: error situations here?
-  json_error_t header_err;
-  req->headers = json_loads(bdata(req->raw_headers),0,&header_err);// json_string(bdata(req->raw_headers));
-  if(req->headers == NULL){
-      fprintf(stderr,"Problem parsing the inputs near position: %d, line: %d, col: %d",header_err.position,header_err.line,header_err.position);
-      goto error;
-  }
-  if(json_typeof(req->headers) != JSON_OBJECT){
-    fprintf(stderr, "Headers did not turn into an object... ruh roh!");
-  }
+  //headers are not parse by default
+  //see: mongrel2_parse_headers
+  req->headers = NULL;
 
   bdestroy(raw_request_bstr);
   return req;
@@ -445,10 +460,13 @@ int mongrel2_disconnect(mongrel2_socket *pub_socket, mongrel2_request *req){
  * @param key
  * @return
  */
-bstring mongrel2_request_get_header(const mongrel2_request *req, const char* key){
+bstring mongrel2_request_get_header(mongrel2_request *req, const char* key){
     if(req->headers == NULL){
-      fprintf(stderr,"mongrel2_request_get_header called against empty headers\n");
-      return NULL;
+      int rc = mongrel2_parse_headers (req);
+      if (rc != 0) {
+        fprintf(stderr,"mongrel2_request_get_header: Cannot parse request headers\n");
+        return NULL;
+      }
     }
 
     json_t *header_val_obj = json_object_get(req->headers,key);
@@ -456,7 +474,7 @@ bstring mongrel2_request_get_header(const mongrel2_request *req, const char* key
       fprintf(stderr,"Ruh roh, could not get key\n");
     }
     const char* val_str = json_string_value(header_val_obj);
-    bstring retval = bfromcstr(val_str);
+    bstring retval = bfromcstr((char*)val_str);
     return retval;
 }
 
@@ -467,7 +485,9 @@ int mongrel2_request_finalize(mongrel2_request *req){
     bdestroy(req->path);
     bdestroy(req->uuid);
     bdestroy(req->conn_id_bstr);
-    json_decref(req->headers);
+    if (req->headers != NULL) {
+      json_decref(req->headers);
+    }
     free(req);
     return 0;
 }

@@ -58,6 +58,8 @@ int mongrel2_close(mongrel2_socket *socket);
 
 mongrel2_request *mongrel2_recv(mongrel2_socket *pull_socket);
 mongrel2_request *mongrel2_parse_request(bstring raw_mongrel_request);
+int mongrel2_parse_headers(mongrel2_request* req);
+bstring mongrel2_request_get_header(mongrel2_request *req, const char* key);
 
 int mongrel2_send(mongrel2_socket *pub_socket, bstring response);
 int mongrel2_reply(mongrel2_socket *pub_socket, mongrel2_request *req, const_bstring payload);
@@ -66,7 +68,6 @@ int mongrel2_reply_http(mongrel2_socket *pub_socket, mongrel2_request *req, cons
 int mongrel2_request_for_disconnect(mongrel2_request *req);
 int mongrel2_disconnect(mongrel2_socket *pub_socket, mongrel2_request *req);
 
-bstring mongrel2_request_get_header(const mongrel2_request *req, const char* key);
 int mongrel2_request_finalize(mongrel2_request *req);
 
 #ifdef __cplusplus
