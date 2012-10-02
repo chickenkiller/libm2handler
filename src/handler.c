@@ -18,9 +18,6 @@
 #include "bstr/bstraux.h"
 #include <strings.h>
 
-#include <stddef.h>
-#include <stdint.h>
-
 static const struct tagbstring SPACE = bsStatic(" ");
 static const struct tagbstring COLON = bsStatic(":");
 static const struct tagbstring COMMA = bsStatic(",");
@@ -28,7 +25,6 @@ static const struct tagbstring SEPERATOR = bsStatic("\r\n\r\n");
 static const struct tagbstring JSON = bsStatic("JSON");
 static const struct tagbstring DISCONNECT = bsStatic("disconnect");
 static const char *RESPONSE_HEADER = "%*s %d:%d, ";
-static const uint64_t HWM = 100;
 // bstring response = bformat(RESPONSE_HEADER,blength(req->uuid),bdata(req->uuid),blength(req->conn_id_bstr),req->conn_id);÷
 
 static void zmq_bstr_free(void *data, void *bstr){
@@ -101,8 +97,8 @@ void mongrel2_set_identity(mongrel2_socket *socket, const char* identity){
  * @param socket
  * @param max_requests
  */
-static void mongrel2_set_hwm(mongrel2_socket *socket, uint64_t max_requests){
-    int zmq_retval = zmq_setsockopt(socket->zmq_socket,ZMQ_HWM,&max_requests,sizeof (uint64_t));
+void mongrel2_set_hwm(mongrel2_socket *socket, uint64_t max_requests){
+    int zmq_retval = zmq_setsockopt(socket->zmq_socket,ZMQ_HWM, &max_requests, sizeof(uint64_t));
     if(zmq_retval != 0){
       switch(errno){
           case EINVAL : {
@@ -124,9 +120,6 @@ static void mongrel2_set_hwm(mongrel2_socket *socket, uint64_t max_requests){
 mongrel2_socket* mongrel2_pull_socket(mongrel2_ctx *ctx){
     mongrel2_socket *socket;
     socket = mongrel2_alloc_socket(ctx,ZMQ_PULL);
-
-    mongrel2_set_hwm(socket, HWM);
-
     return socket;
 }
 mongrel2_socket* mongrel2_pub_socket(mongrel2_ctx *ctx){

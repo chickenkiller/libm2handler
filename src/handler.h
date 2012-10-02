@@ -18,6 +18,9 @@
 #include "bstr/bstrlib.h"
 #include "bstr/bstraux.h"
 
+#include <stddef.h>
+#include <stdint.h>
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -50,6 +53,7 @@ int mongrel2_connect(mongrel2_socket* socket, const char* dest);
 mongrel2_socket* mongrel2_pull_socket(mongrel2_ctx *ctx);
 mongrel2_socket* mongrel2_pub_socket(mongrel2_ctx *ctx);
 void mongrel2_set_identity(mongrel2_socket *socket, const char* identity);
+void mongrel2_set_hwm(mongrel2_socket *socket, uint64_t max_requests);
 int mongrel2_close(mongrel2_socket *socket);
 
 mongrel2_request *mongrel2_recv(mongrel2_socket *pull_socket);
