@@ -73,11 +73,12 @@ int main(int argc, char **args){
 
     mongrel2_ctx *ctx = mongrel2_init(1); // Yes for threads?
 
-    mongrel2_socket *pull_socket = mongrel2_pull_socket(ctx,bdata(&SENDER));
+    mongrel2_socket *pull_socket = mongrel2_pull_socket(ctx);
     mongrel2_connect(pull_socket, bdata(pull_addr));
 
     pub_socket = mongrel2_pub_socket(ctx);
     mongrel2_connect(pub_socket, bdata(pub_addr));
+    mongrel2_set_identity(pub_socket, bdata(&SENDER) );
 
     mongrel2_request *request;
 

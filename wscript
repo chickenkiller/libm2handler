@@ -3,13 +3,31 @@
 APPNAME = 'libm2handler'
 VERSION = '0.5.5'
 
+from waflib import Logs
+
 def options(opt):
 	opt.load('compiler_c compiler_cxx')
+	opt.add_option('--debug', action='store_true', default=False, help='Enable debug compilation flags')
 	opt.add_option('--cross-prefix', default='', dest='crossprefix', type='string', help='Cross compiling prefix (rootfs path)')
 
 def configure(conf):
-	conf.load('compiler_c compiler_cxx')
 	conf.env.version = VERSION
+
+	flags = '-O2 -Wall -Werror'
+	mode  = 'Release'
+
+	if conf.options.debug:
+		mode = 'Debug'
+		flags += ' -g'
+	else:
+		conf.env.append_unique('DEFINES', ['NDEBUG'])
+		# -Wno-error=unused-variable is needed when using assert() with NDEBUG 
+		flags +=' -Wno-error=unused-variable'
+
+	conf.msg("Compilation mode", mode)
+	flags = flags.split()
+
+	conf.load('compiler_c compiler_cxx')
 	conf.check_cfg(package='libzmq' , args='--cflags --libs', uselib_store='ZMQ'    )
 	conf.check_cfg(package='jansson', args='--cflags --libs', uselib_store='JANSSON')
 	if conf.options.crossprefix:
@@ -19,9 +37,11 @@ def configure(conf):
 		conf.env.INCLUDES_JANSSON  = [ conf.options.crossprefix+i for i in conf.env.INCLUDES_JANSSON  ]
 		conf.env.LIBPATH_JANSSON   = [ conf.options.crossprefix+i for i in conf.env.LIBPATH_JANSSON   ]
 		conf.env.STLIBPATH_JANSSON = [ conf.options.crossprefix+i for i in conf.env.STLIBPATH_JANSSON ]
-	flags='-g -Wall -Werror'.split()
+
 	conf.env.append_unique('CFLAGS', flags + ['-std=gnu99'])
 	conf.env.append_unique('CXXFLAGS', flags)
+
+	# DSO stuff
 	conf.env.append_unique('LIB_ZMQ','stdc++ pthread uuid rt m'.split())
 
 def build(bld):
@@ -47,7 +67,7 @@ def build(bld):
 				use      = 'bstr dict sha1 ZMQ JANSSON',
 				install_path = '${PREFIX}/lib'
 				)
-	for handler in 'body_toupper daemon_to_upper fifo_reader ws_handshake ws_variable'.split():
+	for handler in 'body_toupper null_handler daemon_to_upper fifo_reader ws_handshake ws_variable'.split():
 		bld.program(
 				target = handler,
 				source = 'example/handlers/%s.c' % handler,

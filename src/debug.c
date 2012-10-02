@@ -103,7 +103,7 @@ void mongrel2_ws_frame_debug(size_t len, uint8_t* header){
 
 
     uint8_t maskp  = mongrel2_ws_frame_get_mask_present(len,header);
-    fflag msg_type = mongrel2_ws_frame_get_payload_type(len,header);
+    ftype msg_type = mongrel2_ws_frame_get_payload_type(len,header);
 
     uint32_t mask = 0;
     printf("MASKP:   %d\n",maskp);

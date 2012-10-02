@@ -35,7 +35,7 @@ mongrel2_ctx* mongrel2_init(int threads){
     mongrel2_ctx* ctx = calloc(1,sizeof(mongrel2_ctx));
     ctx->zmq_context = zmq_init(threads);
     if(ctx->zmq_context == NULL){
-        fprintf(stderr, "Could not initialize zmq context");
+        fprintf(stderr, "mongrel2_init: Could not initialize zmq context");
         exit(EXIT_FAILURE);
     }
     return ctx;
@@ -43,7 +43,7 @@ mongrel2_ctx* mongrel2_init(int threads){
 int mongrel2_deinit(mongrel2_ctx *ctx){
     int zmq_retval = zmq_term(ctx->zmq_context);
     if(zmq_retval != 0){
-        fprintf(stderr,"Could not terminate ZMQ context");
+        fprintf(stderr,"mongrel2_deinit: Could not terminate ZMQ context");
         exit(EXIT_FAILURE);
     }
     free(ctx);
@@ -60,7 +60,7 @@ static mongrel2_socket* mongrel2_alloc_socket(mongrel2_ctx *ctx, int type){
     mongrel2_socket *ptr = calloc(1,sizeof(mongrel2_socket));
     ptr->zmq_socket = zmq_socket(ctx->zmq_context, type);
     if(ptr == NULL || ptr->zmq_socket == NULL){
-        fprintf(stderr, "Could not allocate socket");
+        fprintf(stderr, "mongrel2_socket: Could not allocate socket");
         exit(EXIT_FAILURE);
     }
     return ptr;
@@ -68,36 +68,66 @@ static mongrel2_socket* mongrel2_alloc_socket(mongrel2_ctx *ctx, int type){
 /**
  * Identity is only needed for pull sockets (right?) so I'll only
  * mongrel2_pull_socket will call this.
- * @param ctx
  * @param socket
  * @param identity
  */
-static void mongrel2_set_identity(mongrel2_ctx *ctx, mongrel2_socket *socket, const char* identity){
+void mongrel2_set_identity(mongrel2_socket *socket, const char* identity){
     int zmq_retval = zmq_setsockopt(socket->zmq_socket,ZMQ_IDENTITY,identity,strlen(identity));
     if(zmq_retval != 0){
       switch(errno){
           case EINVAL : {
-              fprintf(stderr, "Unknown setsockopt property");
+              fprintf(stderr, "mongrel2_set_identity: Unknown setsockopt property");
               break;
           }
           case ETERM : {
-              fprintf(stderr, "ZMQ context already terminated");
+              fprintf(stderr, "mongrel2_set_identity: ZMQ context already terminated");
               break;
           }
           case EFAULT : {
-              fprintf(stderr, "Socket provided was not valid");
+              fprintf(stderr, "mongrel2_set_identity: Socket provided was not valid");
+              break;
+          }
+          default: {
+              fprintf(stderr, "mongrel2_set_identity: Error: %s (%d)", strerror(errno), errno);
               break;
           }
       }
       exit(EXIT_FAILURE);
     }
 }
-mongrel2_socket* mongrel2_pull_socket(mongrel2_ctx *ctx, const char* identity){
+/**
+ * Set high-water-mark to avoid flooding the handler when it cannot keep with the requests
+ * mongrel2_pull_socket will call this.
+ * @param socket
+ * @param max_requests
+ */
+void mongrel2_set_hwm(mongrel2_socket *socket, uint64_t max_requests){
+    int zmq_retval = zmq_setsockopt(socket->zmq_socket,ZMQ_HWM, &max_requests, sizeof(uint64_t));
+    if(zmq_retval != 0){
+      switch(errno){
+          case EINVAL : {
+              fprintf(stderr, "mongrel2_set_hwm: Unknown setsockopt property");
+              break;
+          }
+          case ETERM : {
+              fprintf(stderr, "mongrel2_set_hwm: ZMQ context already terminated");
+              break;
+          }
+          case EFAULT : {
+              fprintf(stderr, "mongrel2_set_hwm: Socket provided was not valid");
+              break;
+          }
+          default: {
+              fprintf(stderr, "mongrel2_set_hwm: Error: %s (%d)", strerror(errno), errno);
+              break;
+          }
+      }
+      exit(EXIT_FAILURE);
+    }
+}
+mongrel2_socket* mongrel2_pull_socket(mongrel2_ctx *ctx){
     mongrel2_socket *socket;
     socket = mongrel2_alloc_socket(ctx,ZMQ_PULL);
-
-    mongrel2_set_identity(ctx,socket,identity);
-
     return socket;
 }
 mongrel2_socket* mongrel2_pub_socket(mongrel2_ctx *ctx){
@@ -111,19 +141,27 @@ int mongrel2_connect(mongrel2_socket* socket, const char* dest){
     if(zmq_retval != 0){
       switch(errno){
           case EPROTONOSUPPORT : {
-              fprintf(stderr, "Protocol not supported");
+              fprintf(stderr, "mongrel2_connect: Protocol not supported");
               break;
           }
           case ENOCOMPATPROTO : {
-              fprintf(stderr, "Protocol not compatible with socket type");
+              fprintf(stderr, "mongrel2_connect: Protocol not compatible with socket type");
               break;
           }
           case ETERM : {
-              fprintf(stderr, "ZMQ context has already been terminated");
+              fprintf(stderr, "mongrel2_connect: ZMQ context has already been terminated");
               break;
           }
           case EFAULT : {
-              fprintf(stderr, "A NULL socket was provided");
+              fprintf(stderr, "mongrel2_connect: A NULL socket was provided");
+              break;
+          }
+          case EINVAL : {
+              fprintf(stderr, "mongrel2_connect: An invalid socket spec was provided : %s", dest);
+              break;
+          }
+          default: {
+              fprintf(stderr, "mongrel2_connect: Error: %s (%d)", strerror(errno), errno);
               break;
           }
       }
@@ -131,6 +169,28 @@ int mongrel2_connect(mongrel2_socket* socket, const char* dest){
     }
     return 0;
 }
+
+/**
+ * Parse the raw request headers as json
+ * @param req
+ * @return 0 on success, -1 on failure
+ */
+int mongrel2_parse_headers(mongrel2_request* req) {
+  // TODO: error situations here?
+  json_error_t header_err;
+  req->headers = json_loads(bdata(req->raw_headers),0,&header_err);// json_string(bdata(req->raw_headers));
+  if(req->headers == NULL){
+      fprintf(stderr,"Problem parsing the inputs near position: %d, line: %d, col: %d",header_err.position,header_err.line,header_err.position);
+      return -1;
+  }
+  if(json_typeof(req->headers) != JSON_OBJECT){
+    fprintf(stderr, "Headers did not turn into an object... ruh roh!");
+    req->headers = NULL;
+    return -1;
+  }
+  return 0;
+}
+
 /**
  * Honky-dory hand-made parser for mongrel2's request format
  *
@@ -240,16 +300,9 @@ mongrel2_request *mongrel2_parse_request(bstring raw_request_bstr){
   fprintf(stdout,"================================\n");
   #endif
 
-  // TODO: error situations here?
-  json_error_t header_err;
-  req->headers = json_loads(bdata(req->raw_headers),0,&header_err);// json_string(bdata(req->raw_headers));
-  if(req->headers == NULL){
-      fprintf(stderr,"Problem parsing the inputs near position: %d, line: %d, col: %d",header_err.position,header_err.line,header_err.position);
-      goto error;
-  }
-  if(json_typeof(req->headers) != JSON_OBJECT){
-    fprintf(stderr, "Headers did not turn into an object... ruh roh!");
-  }
+  //headers are not parse by default
+  //see: mongrel2_parse_headers
+  req->headers = NULL;
 
   bdestroy(raw_request_bstr);
   return req;
@@ -300,7 +353,9 @@ int mongrel2_send(mongrel2_socket *pub_socket, bstring response){
      * It needs to be called on the bstring itself. So that gets passed
      * in as the hint. Whew.
      */
-    printf("mongrel2_send, blength(response): %d",blength(response));
+    #ifndef NDEBUG
+    fprintf(stderr, "mongrel2_send, blength(response): %d\n",blength(response));
+    #endif
     zmq_msg_init_data(msg,bdata(response),blength(response),zmq_bstr_free,response);
 
     zmq_send(pub_socket->zmq_socket,msg,0);
@@ -405,10 +460,13 @@ int mongrel2_disconnect(mongrel2_socket *pub_socket, mongrel2_request *req){
  * @param key
  * @return
  */
-bstring mongrel2_request_get_header(const mongrel2_request *req, const char* key){
+bstring mongrel2_request_get_header(mongrel2_request *req, const char* key){
     if(req->headers == NULL){
-      fprintf(stderr,"mongrel2_request_get_header called against empty headers\n");
-      return NULL;
+      int rc = mongrel2_parse_headers (req);
+      if (rc != 0) {
+        fprintf(stderr,"mongrel2_request_get_header: Cannot parse request headers\n");
+        return NULL;
+      }
     }
 
     json_t *header_val_obj = json_object_get(req->headers,key);
@@ -416,7 +474,7 @@ bstring mongrel2_request_get_header(const mongrel2_request *req, const char* key
       fprintf(stderr,"Ruh roh, could not get key\n");
     }
     const char* val_str = json_string_value(header_val_obj);
-    bstring retval = bfromcstr(val_str);
+    bstring retval = bfromcstr((char*)val_str);
     return retval;
 }
 
@@ -427,7 +485,9 @@ int mongrel2_request_finalize(mongrel2_request *req){
     bdestroy(req->path);
     bdestroy(req->uuid);
     bdestroy(req->conn_id_bstr);
-    json_decref(req->headers);
+    if (req->headers != NULL) {
+      json_decref(req->headers);
+    }
     free(req);
     return 0;
 }

@@ -18,6 +18,9 @@
 #include "bstr/bstrlib.h"
 #include "bstr/bstraux.h"
 
+#include <stddef.h>
+#include <stdint.h>
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -47,12 +50,16 @@ mongrel2_ctx* mongrel2_init(int threads);
 int mongrel2_deinit(mongrel2_ctx *ctx);
 
 int mongrel2_connect(mongrel2_socket* socket, const char* dest);
-mongrel2_socket* mongrel2_pull_socket(mongrel2_ctx *ctx, const char* identity);
+mongrel2_socket* mongrel2_pull_socket(mongrel2_ctx *ctx);
 mongrel2_socket* mongrel2_pub_socket(mongrel2_ctx *ctx);
+void mongrel2_set_identity(mongrel2_socket *socket, const char* identity);
+void mongrel2_set_hwm(mongrel2_socket *socket, uint64_t max_requests);
 int mongrel2_close(mongrel2_socket *socket);
 
 mongrel2_request *mongrel2_recv(mongrel2_socket *pull_socket);
 mongrel2_request *mongrel2_parse_request(bstring raw_mongrel_request);
+int mongrel2_parse_headers(mongrel2_request* req);
+bstring mongrel2_request_get_header(mongrel2_request *req, const char* key);
 
 int mongrel2_send(mongrel2_socket *pub_socket, bstring response);
 int mongrel2_reply(mongrel2_socket *pub_socket, mongrel2_request *req, const_bstring payload);
@@ -61,7 +68,6 @@ int mongrel2_reply_http(mongrel2_socket *pub_socket, mongrel2_request *req, cons
 int mongrel2_request_for_disconnect(mongrel2_request *req);
 int mongrel2_disconnect(mongrel2_socket *pub_socket, mongrel2_request *req);
 
-bstring mongrel2_request_get_header(const mongrel2_request *req, const char* key);
 int mongrel2_request_finalize(mongrel2_request *req);
 
 #ifdef __cplusplus
