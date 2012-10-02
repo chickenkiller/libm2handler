@@ -35,7 +35,7 @@ mongrel2_ctx* mongrel2_init(int threads){
     mongrel2_ctx* ctx = calloc(1,sizeof(mongrel2_ctx));
     ctx->zmq_context = zmq_init(threads);
     if(ctx->zmq_context == NULL){
-        fprintf(stderr, "Could not initialize zmq context");
+        fprintf(stderr, "mongrel2_init: Could not initialize zmq context");
         exit(EXIT_FAILURE);
     }
     return ctx;
@@ -43,7 +43,7 @@ mongrel2_ctx* mongrel2_init(int threads){
 int mongrel2_deinit(mongrel2_ctx *ctx){
     int zmq_retval = zmq_term(ctx->zmq_context);
     if(zmq_retval != 0){
-        fprintf(stderr,"Could not terminate ZMQ context");
+        fprintf(stderr,"mongrel2_deinit: Could not terminate ZMQ context");
         exit(EXIT_FAILURE);
     }
     free(ctx);
@@ -60,7 +60,7 @@ static mongrel2_socket* mongrel2_alloc_socket(mongrel2_ctx *ctx, int type){
     mongrel2_socket *ptr = calloc(1,sizeof(mongrel2_socket));
     ptr->zmq_socket = zmq_socket(ctx->zmq_context, type);
     if(ptr == NULL || ptr->zmq_socket == NULL){
-        fprintf(stderr, "Could not allocate socket");
+        fprintf(stderr, "mongrel2_socket: Could not allocate socket");
         exit(EXIT_FAILURE);
     }
     return ptr;
@@ -76,15 +76,19 @@ void mongrel2_set_identity(mongrel2_socket *socket, const char* identity){
     if(zmq_retval != 0){
       switch(errno){
           case EINVAL : {
-              fprintf(stderr, "Unknown setsockopt property");
+              fprintf(stderr, "mongrel2_set_identity: Unknown setsockopt property");
               break;
           }
           case ETERM : {
-              fprintf(stderr, "ZMQ context already terminated");
+              fprintf(stderr, "mongrel2_set_identity: ZMQ context already terminated");
               break;
           }
           case EFAULT : {
-              fprintf(stderr, "Socket provided was not valid");
+              fprintf(stderr, "mongrel2_set_identity: Socket provided was not valid");
+              break;
+          }
+          default: {
+              fprintf(stderr, "mongrel2_set_identity: Error: %s (%d)", strerror(errno), errno);
               break;
           }
       }
@@ -102,15 +106,19 @@ void mongrel2_set_hwm(mongrel2_socket *socket, uint64_t max_requests){
     if(zmq_retval != 0){
       switch(errno){
           case EINVAL : {
-              fprintf(stderr, "Unknown setsockopt property");
+              fprintf(stderr, "mongrel2_set_hwm: Unknown setsockopt property");
               break;
           }
           case ETERM : {
-              fprintf(stderr, "ZMQ context already terminated");
+              fprintf(stderr, "mongrel2_set_hwm: ZMQ context already terminated");
               break;
           }
           case EFAULT : {
-              fprintf(stderr, "Socket provided was not valid");
+              fprintf(stderr, "mongrel2_set_hwm: Socket provided was not valid");
+              break;
+          }
+          default: {
+              fprintf(stderr, "mongrel2_set_hwm: Error: %s (%d)", strerror(errno), errno);
               break;
           }
       }
@@ -133,19 +141,27 @@ int mongrel2_connect(mongrel2_socket* socket, const char* dest){
     if(zmq_retval != 0){
       switch(errno){
           case EPROTONOSUPPORT : {
-              fprintf(stderr, "Protocol not supported");
+              fprintf(stderr, "mongrel2_connect: Protocol not supported");
               break;
           }
           case ENOCOMPATPROTO : {
-              fprintf(stderr, "Protocol not compatible with socket type");
+              fprintf(stderr, "mongrel2_connect: Protocol not compatible with socket type");
               break;
           }
           case ETERM : {
-              fprintf(stderr, "ZMQ context has already been terminated");
+              fprintf(stderr, "mongrel2_connect: ZMQ context has already been terminated");
               break;
           }
           case EFAULT : {
-              fprintf(stderr, "A NULL socket was provided");
+              fprintf(stderr, "mongrel2_connect: A NULL socket was provided");
+              break;
+          }
+          case EINVAL : {
+              fprintf(stderr, "mongrel2_connect: An invalid socket spec was provided : %s", dest);
+              break;
+          }
+          default: {
+              fprintf(stderr, "mongrel2_connect: Error: %s (%d)", strerror(errno), errno);
               break;
           }
       }
