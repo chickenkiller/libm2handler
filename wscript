@@ -56,7 +56,7 @@ def build(bld):
 	bld.stlib( target='bstr', source='src/bstr/bstrlib.c src/bstr/bstraux.c', includes='src/bstr')
 	bld.stlib( target='dict', source='src/adt/dict.c',                        includes='src/adt' )
 	bld.shlib(
-			name     = 'm2handler_sh'
+			name     = 'm2handler_sh',
 			target   = 'm2handler',
 			source   = bld.path.ant_glob('src/*.c'),
 			vnum     = VERSION,
@@ -66,7 +66,7 @@ def build(bld):
 			install_path = '${PREFIX}/lib'
 			)
 	bld.stlib(
-			name     = 'm2handler_st'
+			name     = 'm2handler_st',
 			target   = 'm2handler',
 			source   = bld.path.ant_glob('src/*.c'),
 			vnum     = VERSION,
