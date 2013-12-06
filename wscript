@@ -55,18 +55,26 @@ def build(bld):
 	bld.stlib( target='sha1', source='src/sha1/sha1.c',                       includes='src/sha1')
 	bld.stlib( target='bstr', source='src/bstr/bstrlib.c src/bstr/bstraux.c', includes='src/bstr')
 	bld.stlib( target='dict', source='src/adt/dict.c',                        includes='src/adt' )
-	for type in 'st sh'.split():
-		bld(
-				features = 'c c%slib' % type,
-				name     = 'm2handler_%s' % type,
-				target   = 'm2handler',
-				source   = bld.path.ant_glob('src/*.c'),
-				vnum     = VERSION,
-				includes = 'src',
-				export_includes = 'src',
-				use      = 'bstr dict sha1 ZMQ JANSSON',
-				install_path = '${PREFIX}/lib'
-				)
+	bld.shlib(
+			name     = 'm2handler_sh'
+			target   = 'm2handler',
+			source   = bld.path.ant_glob('src/*.c'),
+			vnum     = VERSION,
+			includes = 'src',
+			export_includes = 'src',
+			use      = 'bstr dict sha1 ZMQ JANSSON',
+			install_path = '${PREFIX}/lib'
+			)
+	bld.stlib(
+			name     = 'm2handler_st'
+			target   = 'm2handler',
+			source   = bld.path.ant_glob('src/*.c'),
+			vnum     = VERSION,
+			includes = 'src',
+			export_includes = 'src',
+			use      = 'bstr dict sha1 ZMQ JANSSON',
+			install_path = '${PREFIX}/lib'
+			)
 	for handler in 'body_toupper null_handler daemon_to_upper fifo_reader ws_handshake ws_variable'.split():
 		bld.program(
 				target = handler,
