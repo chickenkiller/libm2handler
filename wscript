@@ -52,9 +52,27 @@ def build(bld):
 			cwd = srcdir,
 			relative_trick = True
 			)
-	bld.stlib( target='sha1', source='src/sha1/sha1.c',                       includes='src/sha1')
-	bld.stlib( target='bstr', source='src/bstr/bstrlib.c src/bstr/bstraux.c', includes='src/bstr')
-	bld.stlib( target='dict', source='src/adt/dict.c',                        includes='src/adt' )
+	bld.stlib(
+		target='sha1',
+		source='src/sha1/sha1.c',
+		includes='src/sha1',
+		cflags='-fPIC',
+		defines='_REENTRANT'
+		)
+	bld.stlib(
+		target='bstr',
+		source='src/bstr/bstrlib.c src/bstr/bstraux.c',
+		includes='src/bstr',
+		cflags='-fPIC',
+		defines='_REENTRANT'
+		)
+	bld.stlib(
+		target='dict',
+		source='src/adt/dict.c',
+		includes='src/adt',
+		cflags='-fPIC',
+		defines='_REENTRANT'
+		)
 	bld.shlib(
 			name     = 'm2handler_sh',
 			target   = 'm2handler',
