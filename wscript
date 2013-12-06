@@ -13,7 +13,7 @@ def options(opt):
 def configure(conf):
 	conf.env.version = VERSION
 
-	flags = '-O2 -Wall -Werror'
+	flags = '-O2 -Wall'
 	mode  = 'Release'
 
 	if conf.options.debug:
