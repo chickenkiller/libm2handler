@@ -2,6 +2,8 @@
 
 A C library for handling requests from Mongrel2. Includes a suite of sample handlers to get you up and running.
 
+[![Build Status](https://drone.io/github.com/chickenkiller/libm2handler/status.png)](https://drone.io/github.com/chickenkiller/libm2handler/latest)
+
 ### Prequisites ###
 
 #### mongrel2 ####
