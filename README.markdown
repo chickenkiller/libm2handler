@@ -10,6 +10,10 @@ A C library for handling requests from Mongrel2. Includes a suite of sample hand
 
     http://www.mongrel2.org/
 
+#### zeromq 3 or greater ####
+
+    http://www.zeromq.org/
+
 #### libjansson ####
 
     http://www.digip.org/jansson/
