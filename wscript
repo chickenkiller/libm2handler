@@ -28,7 +28,11 @@ def configure(conf):
 	flags = flags.split()
 
 	conf.load('compiler_c compiler_cxx')
-	conf.check_cfg(package='libzmq' , args='--cflags --libs', uselib_store='ZMQ'    )
+	conf.check_cfg(
+		package='libzmq',
+		args=['libzmq >= 3.0.0','--cflags','--libs'],
+		uselib_store='ZMQ',
+		msg="Checking for ZeroMQ >= 3.0.0")
 	conf.check_cfg(package='jansson', args='--cflags --libs', uselib_store='JANSSON')
 	if conf.options.crossprefix:
 		conf.env.INCLUDES_ZMQ      = [ conf.options.crossprefix+i for i in conf.env.INCLUDES_ZMQ      ]
