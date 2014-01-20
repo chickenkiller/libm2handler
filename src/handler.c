@@ -96,29 +96,29 @@ void mongrel2_set_identity(mongrel2_socket *socket, const char* identity){
     }
 }
 /**
- * Set high-water-mark to avoid flooding the handler when it cannot keep with the requests
+ * Set reception high-water-mark to avoid flooding the handler when it cannot keep with the requests
  * mongrel2_pull_socket will call this.
  * @param socket
  * @param max_requests
  */
-void mongrel2_set_hwm(mongrel2_socket *socket, uint64_t max_requests){
-    int zmq_retval = zmq_setsockopt(socket->zmq_socket,ZMQ_HWM, &max_requests, sizeof(uint64_t));
+void mongrel2_set_rcvhwm(mongrel2_socket *socket, uint64_t max_requests){
+    int zmq_retval = zmq_setsockopt(socket->zmq_socket, ZMQ_RCVHWM, &max_requests, sizeof(uint64_t));
     if(zmq_retval != 0){
       switch(errno){
           case EINVAL : {
-              fprintf(stderr, "mongrel2_set_hwm: Unknown setsockopt property");
+              fprintf(stderr, "mongrel2_set_rcvhwm: Unknown setsockopt property");
               break;
           }
           case ETERM : {
-              fprintf(stderr, "mongrel2_set_hwm: ZMQ context already terminated");
+              fprintf(stderr, "mongrel2_set_rcvhwm: ZMQ context already terminated");
               break;
           }
           case EFAULT : {
-              fprintf(stderr, "mongrel2_set_hwm: Socket provided was not valid");
+              fprintf(stderr, "mongrel2_set_rcvhwm: Socket provided was not valid");
               break;
           }
           default: {
-              fprintf(stderr, "mongrel2_set_hwm: Error: %s (%d)", strerror(errno), errno);
+              fprintf(stderr, "mongrel2_set_rcvhwm: Error: %s (%d)", strerror(errno), errno);
               break;
           }
       }
@@ -323,7 +323,7 @@ mongrel2_request *mongrel2_parse_request(bstring raw_request_bstr){
 mongrel2_request *mongrel2_recv(mongrel2_socket *pull_socket){
     zmq_msg_t *msg = calloc(1,sizeof(zmq_msg_t));
     zmq_msg_init(msg);
-    zmq_recv(pull_socket->zmq_socket,msg,0);
+    zmq_recvmsg(pull_socket->zmq_socket,msg,0);
     
     bstring raw_request_bstr = blk2bstr(zmq_msg_data(msg),zmq_msg_size(msg));
     mongrel2_request *req = mongrel2_parse_request(raw_request_bstr);
@@ -358,7 +358,7 @@ int mongrel2_send(mongrel2_socket *pub_socket, bstring response){
     #endif
     zmq_msg_init_data(msg,bdata(response),blength(response),zmq_bstr_free,response);
 
-    zmq_send(pub_socket->zmq_socket,msg,0);
+    zmq_sendmsg(pub_socket->zmq_socket,msg,0);
     zmq_msg_close(msg);
     free(msg);
 

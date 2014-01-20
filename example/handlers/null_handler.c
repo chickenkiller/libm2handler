@@ -36,7 +36,7 @@ int main(int argc, char **args){
 
     pull_socket = mongrel2_pull_socket(ctx);
     //set high water mark to avoid flooding this handler
-    mongrel2_set_hwm(pull_socket, HWM);
+    mongrel2_set_rcvhwm(pull_socket, HWM);
 
     pub_socket = mongrel2_pub_socket(ctx);
 
